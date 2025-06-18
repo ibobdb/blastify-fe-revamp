@@ -1,0 +1,42 @@
+name: release-please
+
+# This workflow only runs when manually triggered through the GitHub Actions UI
+on:
+  workflow_dispatch:
+    inputs:
+      releaseAs:
+        description: 'Release as (optional, e.g., "patch", "minor", "major")'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: node
+          package-name: blastify-revamp-fe
+          release-as: ${{ inputs.releaseAs }}
+          changelog-types: |
+            [
+              {"type":"feat","section":"Features"},
+              {"type":"fix","section":"Bug Fixes"},
+              {"type":"chore","section":"Chores"},
+              {"type":"docs","section":"Documentation"},
+              {"type":"style","section":"Styles"},
+              {"type":"refactor","section":"Code Refactoring"},
+              {"type":"perf","section":"Performance Improvements"},
+              {"type":"test","section":"Tests"}
+            ]
+
+# To use this workflow:
+# 1. Go to the Actions tab in your repository
+# 2. Select the "release-please" workflow
+# 3. Click "Run workflow"
+# 4. Optionally enter "patch", "minor", or "major" to specify the release type
+# 5. Click "Run workflow" to start the release process

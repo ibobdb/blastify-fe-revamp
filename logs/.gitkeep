@@ -1,0 +1,8 @@
+# Logs Directory
+
+This directory is used to store application logs in production environments.
+The actual log files are gitignored and won't be committed to the repository.
+
+## Configuration
+
+The logging configuration can be found in `src/utils/logger.ts`
