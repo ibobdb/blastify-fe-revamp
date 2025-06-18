@@ -5,6 +5,8 @@ import './globals.css';
 // Providers
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/context/auth.context';
+import { LoadingProvider } from '@/context/loading.context';
+import { LoadingContainer } from '@/components/loading-container';
 import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
@@ -39,8 +41,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            {children}
-            <Toaster />
+            <LoadingProvider>
+              <LoadingContainer>{children}</LoadingContainer>
+              <Toaster />
+            </LoadingProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

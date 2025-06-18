@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context';
 import AuthDiagnostics from '@/components/debug/auth-diagnostics';
 import { MiddlewareProtectionTester } from '@/components/auth/middleware-tester';
+import DataTableWithLoading from '@/components/dashboard/data-table-with-loading';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -31,6 +32,10 @@ export default function DashboardPage() {
             <Button className="font-medium">New Campaign</Button>
           </div>
         </div>{' '}
+        {/* Data table with loading example */}
+        <div className="mb-8">
+          <DataTableWithLoading />
+        </div>
         {/* Auth diagnostics and middleware testing components */}
         <div className="mb-6 space-y-6">
           <MiddlewareProtectionTester />

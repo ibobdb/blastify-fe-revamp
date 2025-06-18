@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context';
+import { useLoading } from '@/context/loading.context';
+import { Loading } from '@/components/ui/loading';
 import { checkProtectedRouteAccess } from '@/utils/route-protection';
+import logger from '@/utils/logger';
 
 /**
  * ProtectedRoute component that works with middleware
@@ -11,15 +14,21 @@ import { checkProtectedRouteAccess } from '@/utils/route-protection';
  * This provides an additional client-side check on top of the middleware
  * for better UX (avoids unnecessary page loads and redirects)
  */
+// Create a logger for the protected route
+const protectedRouteLogger = logger.child('ProtectedRoute');
+
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { showLoading, hideLoading } = useLoading();
   const pathname = usePathname();
   const router = useRouter();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // If auth is still loading, wait for it
-    if (loading) {
+    // If auth is still loading, show loading indicator
+    if (authLoading) {
+      showLoading('Verifying authentication...');
+      protectedRouteLogger.debug('Authentication verification in progress');
       return;
     }
 
@@ -27,19 +36,28 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { hasAccess, redirectTo } = checkProtectedRouteAccess(pathname);
 
     if (!hasAccess && redirectTo) {
+      protectedRouteLogger.info(
+        `Access denied to ${pathname}, redirecting to ${redirectTo}`
+      );
+      showLoading('Redirecting to login...');
       router.push(redirectTo);
     } else {
+      protectedRouteLogger.debug(`Access granted to ${pathname}`);
       setChecking(false);
+      hideLoading();
     }
-  }, [isAuthenticated, loading, pathname, router]);
+  }, [
+    isAuthenticated,
+    authLoading,
+    pathname,
+    router,
+    showLoading,
+    hideLoading,
+  ]);
 
-  // Show nothing while checking authentication
-  if (loading || checking) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+  // Show loading while checking authentication
+  if (authLoading || checking) {
+    return <Loading fullScreen text="Verifying access..." />;
   }
 
   // Authentication successful, render the protected content
