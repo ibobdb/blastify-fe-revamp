@@ -65,25 +65,8 @@ export const deviceService = {
   getClientStatus: async (): Promise<ClientResponse> => {
     try {
       deviceLogger.info('Fetching client status');
-      const response = await api.get('/client');
 
-      // Handle "Client not found" response
-      if (
-        response.data.status === false &&
-        (response.data.message === 'Client not found' ||
-          response.data.code === 'NOT_FOUND')
-      ) {
-        deviceLogger.info('No clients found - client not found');
-        return {
-          status: false,
-          message: 'No devices connected',
-          data: {
-            clientId: '',
-            status: 'DISCONNECTED',
-            lastActive: new Date().toISOString(),
-          },
-        };
-      }
+      const response = await api.get('/client');
 
       deviceLogger.info('Client data retrieved successfully');
       return response.data;
@@ -122,95 +105,33 @@ export const deviceService = {
       const response = await api.get('/client/qr');
 
       deviceLogger.debug('QR code status retrieved successfully');
+
       return {
-        status: response.data.data?.status || response.data.status,
-        qrCode: response.data.data?.qrCode || response.data.qrCode,
+        status: response.data.status,
+        qrCode: response.data.qrCode,
         message: response.data.message,
       };
     } catch (error) {
       deviceLogger.error('Error polling QR code status', error);
 
-      // Return error status
+      // Fallback mock for testing
+      await mockDelay();
+
+      // Return a mock response with a random status
+      // In real implementation, this would come from the API
+      const mockStatuses = [
+        'INITIALIZING',
+        'CONNECTED',
+        'DISCONNECTED',
+        'IDLE',
+      ];
+      const randomStatus =
+        mockStatuses[Math.floor(Math.random() * mockStatuses.length)];
+
       return {
-        status: 'ERROR',
-        message: 'Failed to poll QR code status. Please try again.',
+        status: randomStatus,
+        message: 'Mock QR code status check',
       };
-    }
-  },
-  /**
-   * Reconnect an existing device using the API
-   * @param deviceId The ID of the device to reconnect
-   * @returns Object containing success status, QR code data if needed, and status
-   *
-   * NOTE: Uses the same endpoint as connectDevice (/client/connect)
-   * since the backend handles reconnection through the same flow
-   */
-  reconnectDevice: async (
-    deviceId: string
-  ): Promise<{
-    success: boolean;
-    qrCode?: string;
-    message?: string;
-    status?: string;
-  }> => {
-    try {
-      deviceLogger.info(`Initiating reconnection for device ${deviceId}`); // Use the same endpoint as connectDevice
-      const response = await api.post('/client/connect', {
-        // Include the deviceId for reconnection
-        clientId: deviceId,
-      });
-
-      deviceLogger.info(`Device reconnection initiated for ${deviceId}`);
-
-      // Check if device is immediately connected (no QR needed)
-      if (response.data.data?.status === 'CONNECTED') {
-        return {
-          success: true,
-          status: 'CONNECTED',
-          message: response.data.message || 'Device reconnected successfully',
-        };
-      }
-
-      // Otherwise return QR code for scanning
-      return {
-        success: true,
-        qrCode: response.data.data?.qrCode || response.data.qrCode,
-        status: response.data.data?.status || response.data.status,
-        message: response.data.message,
-      };
-    } catch (error) {
-      deviceLogger.error(`Error reconnecting device ${deviceId}`, error);
-
-      // Check if we're in development mode and provide mock data
-      if (process.env.NODE_ENV === 'development') {
-        // Fallback to mock QR code for testing
-        await mockDelay();
-
-        // During testing, randomly decide if device is already connected
-        const isAlreadyConnected = Math.random() > 0.7;
-
-        if (isAlreadyConnected) {
-          return {
-            success: true,
-            status: 'CONNECTED',
-            message: 'Device reconnected successfully (mock)',
-          };
-        }
-
-        return {
-          success: true,
-          qrCode: '', // In a real app, this would be base64 QR code data
-          status: 'INITIALIZING',
-          message: 'Mock reconnection initiated. Please scan the QR code.',
-        };
-      } else {
-        // In production, return error
-        return {
-          success: false,
-          status: 'ERROR',
-          message: 'Failed to reconnect device. Please try again.',
-        };
-      }
     }
   },
 
@@ -220,28 +141,15 @@ export const deviceService = {
   getAllDevices: async (): Promise<Device[]> => {
     try {
       deviceLogger.info('Fetching all devices');
+
       const response = await api.get('/client');
-      // Check for the "Client not found" response
-      if (
-        (response.data.data.status === false &&
-          (response.data.data.message === 'Client not found' ||
-            response.data.data.code === 'NOT_FOUND')) ||
-        response.data.data.status === 'DISCONNECTED' ||
-        response.data.data.status === 'LOGOUT'
-      ) {
-        deviceLogger.info('No devices connected - client not found');
-        return []; // Return empty array when no clients are connected
-      }
 
       deviceLogger.debug('Devices retrieved successfully');
-      // Transform API data to match the Device interface
-      // Check if we have data and convert to array if it's a single object
-      if (response.data && response.data.data) {
-        const apiDevices = Array.isArray(response.data.data)
-          ? response.data.data
-          : [response.data.data];
 
-        return apiDevices.map((apiDevice: any) => ({
+      // Transform API data to match the Device interface
+      // Assuming the API returns an array of devices in data.devices
+      if (response.data.devices && Array.isArray(response.data.devices)) {
+        return response.data.devices.map((apiDevice: any) => ({
           id: apiDevice.clientId || apiDevice.id,
           name: apiDevice.name || 'Unknown Device',
           status: mapApiStatusToUiStatus(apiDevice.status),
@@ -260,8 +168,8 @@ export const deviceService = {
       deviceLogger.error('Error fetching devices', error);
 
       // Fallback to mock data if the API call fails
-      // await mockDelay();
-      return [];
+      await mockDelay();
+      return mockDevices;
     }
   },
 
@@ -271,17 +179,8 @@ export const deviceService = {
   getDeviceById: async (id: string): Promise<Device | null> => {
     try {
       deviceLogger.info(`Fetching device with ID: ${id}`);
-      const response = await api.get(`/client/${id}`);
 
-      // Check for the "Client not found" response
-      if (
-        response.data.status === false &&
-        (response.data.message === 'Client not found' ||
-          response.data.code === 'NOT_FOUND')
-      ) {
-        deviceLogger.info(`Device ${id} not found - client not found`);
-        return null;
-      }
+      const response = await api.get(`/client/${id}`);
 
       deviceLogger.debug(`Device ${id} retrieved successfully`);
 
@@ -399,6 +298,7 @@ export const deviceService = {
       };
     }
   },
+
   /**
    * Delete device via API
    */
@@ -406,8 +306,7 @@ export const deviceService = {
     try {
       deviceLogger.info(`Deleting device with ID: ${id}`);
 
-      // Using the /client/delete-device endpoint with POST and no payload
-      const response = await api.post('/client/delete-device');
+      const response = await api.delete(`/client/${id}`);
 
       deviceLogger.info('Device deleted successfully', {
         deviceId: id,

@@ -6,6 +6,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/context/auth.context';
 import { LoadingProvider } from '@/context/loading.context';
+import { ConfirmProvider } from '@/context/confirm.context';
 import { LoadingContainer } from '@/components/loading-container';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -42,8 +43,10 @@ export default function RootLayout({
         >
           <AuthProvider>
             <LoadingProvider>
-              <LoadingContainer>{children}</LoadingContainer>
-              <Toaster />
+              <ConfirmProvider>
+                <LoadingContainer>{children}</LoadingContainer>
+                <Toaster />
+              </ConfirmProvider>
             </LoadingProvider>
           </AuthProvider>
         </ThemeProvider>
