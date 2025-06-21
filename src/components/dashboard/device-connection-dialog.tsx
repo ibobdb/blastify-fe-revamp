@@ -123,22 +123,31 @@ export function DeviceConnectionDialog({
   const [deviceStatus, setDeviceStatus] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Handle device action (either connect new device or reconnect existing device)
+  const progressTimerRef = useRef<NodeJS.Timeout | null>(null); // Handle device action (either connect new device or reconnect existing device)
   const initiateDeviceAction = async () => {
     setIsLoading(true);
 
+    // First, ensure we stop any existing polling
+    stopPolling();
+
+    // Set device status to initializing when starting the action
+    setDeviceStatus('INITIALIZING');
+
     try {
       let result: DeviceActionResult;
+      console.log(
+        `Initiating device ${isReconnect ? 'reconnection' : 'connection'}`
+      );
 
       // Call appropriate API based on whether this is a reconnect or new connection
       if (isReconnect && deviceToReconnect) {
         // For reconnection
         result = await deviceService.reconnectDevice(deviceToReconnect.id);
+        console.log('Reconnect API result:', result);
       } else {
         // For new device connection
         result = await deviceService.connectDevice();
+        console.log('Connect API result:', result);
       }
 
       if (result.success) {
@@ -146,6 +155,7 @@ export function DeviceConnectionDialog({
         const qrCodeValue = result.qrcode;
         if (qrCodeValue) {
           // Store the original QR code data
+          console.log('Setting QR code data from action result');
           setQrCodeData(qrCodeValue);
         }
 
@@ -160,8 +170,13 @@ export function DeviceConnectionDialog({
           );
         }
 
-        // Start polling
-        startPolling();
+        // Start polling, with a small delay to ensure state is set properly
+        setTimeout(() => {
+          if (!isPolling) {
+            console.log('Starting polling after successful action');
+            startPolling();
+          }
+        }, 100);
       } else {
         toast.error(
           `Failed to ${isReconnect ? 'reconnect' : 'connect'} device`
@@ -174,35 +189,57 @@ export function DeviceConnectionDialog({
           isReconnect ? 'reconnect' : 'connect'
         } device. Please try again.`
       );
+
+      // Even on error, try starting polling if we have a QR code
+      // This helps recover from transient errors
+      if (qrCodeData && !isPolling) {
+        setTimeout(() => startPolling(), 1000);
+      }
     } finally {
       setIsLoading(false);
     }
-  };
-  // Poll QR code status from the API
+  }; // Poll QR code status from the API with improved error handling
   const pollQrCodeStatus = async () => {
     // Only run on client side
     if (!isClient) return;
 
+    // Skip if we're not supposed to be polling anymore
+    if (!isPolling && pollTimerRef.current === null) return;
+
     try {
       // Set loading state when starting a poll request
       setIsLoading(true);
-      console.log('Polling QR code status...');
-      // Call the API endpoint to get QR status
-      const response = await deviceService.pollQrCode();
-      console.log('Polling QR code response:', response);
+      console.log(`Polling QR code status... (isReconnect: ${isReconnect})`);
+
+      // Call the API endpoint to get QR status with timeout
+      let response;
+      try {
+        // Standard API call
+        response = await deviceService.pollQrCode();
+        console.log('Polling QR code response:', response);
+      } catch (apiError) {
+        console.error('API error during polling:', apiError);
+        // If API call fails, we'll continue polling next time
+        setIsLoading(false);
+        return;
+      }
+
       // Type assertion to handle potential qrcode property
       const responseWithPossibleQrcode = response as {
         qrCode?: string;
         status: string;
         message?: string;
       };
-      console.log('Polling QR code status:', responseWithPossibleQrcode);
-      console.log(responseWithPossibleQrcode.qrCode);
+
       const qrCodeValue = responseWithPossibleQrcode.qrCode;
       if (qrCodeValue) {
         // Store the original QR code data
+        console.log('Setting new QR code data');
         setQrCodeData(qrCodeValue);
-      } // Update the device status
+      }
+
+      // Update the device status
+      console.log(`Device status update: ${response.status}`);
       setDeviceStatus(response.status);
 
       // If the device is connected, stop polling and close the dialog
@@ -229,13 +266,8 @@ export function DeviceConnectionDialog({
           onOpenChange(false);
         }, 1500); // Give the user a moment to see the success message
         return;
-      }
-
-      // If the device is disconnected, also stop polling and close the dialog
-      if (
-        response.status === 'DISCONNECTED' ||
-        response.status !== 'INITIALIZING'
-      ) {
+      } // If the device is disconnected, also stop polling and close the dialog
+      if (response.status === 'DISCONNECTED') {
         stopPolling();
 
         // Show a disconnected message
@@ -255,28 +287,52 @@ export function DeviceConnectionDialog({
           onOpenChange(false);
         }, 1500);
         return;
-      }
-
-      // If we've reached the maximum retries, generate a new QR code
+      } // If we've reached the maximum retries, generate a new QR code
       if (retryCount >= MAX_RETRIES - 1) {
+        console.log('Maximum retries reached, requesting new QR code');
         // Reset progress and retry count
         setProgress(0);
         setRetryCount(0);
 
-        // Get a new QR code
-        let newQrResult: DeviceActionResult;
-        newQrResult = await deviceService.connectDevice();
-        console.log('New QR code result:', newQrResult);
+        try {
+          // Get a new QR code - use the appropriate method based on connection type
+          let newQrResult: DeviceActionResult;
 
-        const qrCodeValue = newQrResult.qrcode;
-        if (newQrResult.success && qrCodeValue) {
-          // Store the original QR code data
-          setQrCodeData(qrCodeValue);
-          toast.info('Generated a new QR code. Please scan with your device.');
+          if (isReconnect && deviceToReconnect) {
+            console.log('Requesting new reconnection QR code');
+            newQrResult = await deviceService.reconnectDevice(
+              deviceToReconnect.id
+            );
+          } else {
+            console.log('Requesting new connection QR code');
+            newQrResult = await deviceService.connectDevice();
+          }
+
+          console.log('New QR code result:', newQrResult);
+
+          const qrCodeValue = newQrResult.qrcode;
+          if (newQrResult.success && qrCodeValue) {
+            // Store the original QR code data
+            setQrCodeData(qrCodeValue);
+            toast.info(
+              'Generated a new QR code. Please scan with your device.'
+            );
+          } else {
+            console.error('Failed to get new QR code');
+            // If we failed to get a new QR code, try again after a delay
+            setTimeout(() => pollQrCodeStatus(), 2000);
+          }
+        } catch (error) {
+          console.error('Error getting new QR code:', error);
+          // Reset retry count to try again soon
+          setRetryCount(MAX_RETRIES - 2);
         }
-      } else {
-        // Increment retry count for next poll
+      } else if (deviceStatus !== 'INITIALIZING') {
+        // Only increment retry count if not in initializing state
         setRetryCount((prev) => prev + 1);
+        console.log(
+          `Retry count incremented to ${retryCount + 1} of ${MAX_RETRIES}`
+        );
       }
     } catch (error) {
       console.error('Error polling QR code status:', error);
@@ -285,47 +341,89 @@ export function DeviceConnectionDialog({
     } finally {
       setIsLoading(false);
     }
-  };
-  // Start the polling process
+  }; // Start the polling process with improved reliability
   const startPolling = () => {
     // Only run on client side
-    if (!isClient || isPolling) return;
+    if (!isClient) return;
 
+    // If already polling, clear existing timers first to prevent duplicates
+    if (isPolling) {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      if (progressTimerRef.current) clearInterval(progressTimerRef.current);
+    }
+
+    console.log('Starting polling process');
     setIsPolling(true);
     setRetryCount(0);
     setProgress(0);
 
     // Start the progress timer that updates every 100ms
+    // This timer will only update progress when not in INITIALIZING state
     progressTimerRef.current = setInterval(() => {
       setProgress((prev) => {
+        // Skip progress update if in INITIALIZING state
+        if (deviceStatus === 'INITIALIZING') return prev;
+
         const increment = 100 / (TOTAL_POLL_TIME / 100); // Calculate increment per 100ms
         const newProgress = Math.min(prev + increment, 100);
         return newProgress;
       });
     }, 100);
 
-    // Start the polling timer
-    pollTimerRef.current = setInterval(pollQrCodeStatus, QR_POLL_INTERVAL);
+    // Start the polling timer with error handling
+    try {
+      pollTimerRef.current = setInterval(() => {
+        // Use a try-catch inside the interval to prevent it from breaking
+        try {
+          pollQrCodeStatus().catch((error) => {
+            console.error('Error in polling interval:', error);
+            // Continue polling despite errors
+          });
+        } catch (e) {
+          console.error('Unexpected error in polling interval:', e);
+        }
+      }, QR_POLL_INTERVAL);
+    } catch (e) {
+      console.error('Failed to set up polling interval:', e);
+      // Attempt recovery
+      setTimeout(() => {
+        if (!isPolling) startPolling();
+      }, 1000);
+    }
 
-    // Immediately poll once to start
-    pollQrCodeStatus();
-  };
-  // Stop the polling process
+    // Immediately poll once to start (with error handling)
+    pollQrCodeStatus().catch((error) => {
+      console.error('Error in initial poll:', error);
+      // Poll again after a short delay if initial poll fails
+      setTimeout(() => pollQrCodeStatus(), 1000);
+    });
+  }; // Stop the polling process with improved cleanup
   const stopPolling = () => {
     // Only run on client side (and check if window exists for safety)
     if (typeof window === 'undefined') return;
 
-    // Clear timers
-    if (pollTimerRef.current) {
-      clearInterval(pollTimerRef.current);
-      pollTimerRef.current = null;
+    console.log('Stopping polling process');
+
+    // Clear timers with error handling
+    try {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+    } catch (e) {
+      console.error('Error clearing polling timer:', e);
     }
 
-    if (progressTimerRef.current) {
-      clearInterval(progressTimerRef.current);
-      progressTimerRef.current = null;
+    try {
+      if (progressTimerRef.current) {
+        clearInterval(progressTimerRef.current);
+        progressTimerRef.current = null;
+      }
+    } catch (e) {
+      console.error('Error clearing progress timer:', e);
     }
 
+    // Ensure polling state is reset
     setIsPolling(false);
   }; // First useEffect for client-side initialization
   useEffect(() => {
@@ -335,29 +433,84 @@ export function DeviceConnectionDialog({
     // Set the correct initial stage based on props
     const initialStage = isReconnect || skipPolicy ? 'qrcode' : 'policy';
     setFlowStage(initialStage);
-  }, [isReconnect, skipPolicy]);
-  // Clean up timers when the component unmounts or dialog closes
+  }, [isReconnect, skipPolicy]); // Monitor dialog state and manage polling
   useEffect(() => {
     // Only run this effect on the client
     if (!isClient) return;
 
+    console.log(
+      `Dialog state changed: isOpen=${isOpen}, flowStage=${flowStage}, isPolling=${isPolling}`
+    );
+
     // Start polling when we reach the QR code stage
     if (isOpen && flowStage === 'qrcode') {
+      console.log('QR code stage reached, evaluating polling needs');
+
       // For reconnection, we need to initiate the reconnect process first
       // But only if we have a device to reconnect and no QR code data yet
-      // This will only happen after policy is confirmed or for reconnection/skipPolicy flows
-      if (isReconnect && deviceToReconnect && !qrCodeData) {
+      if (isReconnect && deviceToReconnect && !qrCodeData && !isPolling) {
+        console.log('Starting reconnection process automatically');
+        // Set device status to initializing for reconnection
+        setDeviceStatus('INITIALIZING');
         initiateDeviceAction();
       }
       // We removed the automatic polling start for non-reconnect flows
       // Now it only starts after policy confirmation via handlePolicyConfirm
+
+      // Recovery mechanism: If we have QR code data but aren't polling, restart polling
+      else if (qrCodeData && !isPolling) {
+        console.log(
+          'QR code exists but no polling active - restarting polling'
+        );
+        setTimeout(() => startPolling(), 300);
+      }
     }
 
-    // Clean up on unmount
-    return () => {
+    // If dialog is closed, stop polling
+    if (!isOpen) {
       stopPolling();
+    }
+
+    // Clean up on unmount or when dialog closes
+    return () => {
+      if (!isOpen) {
+        stopPolling();
+      }
     };
-  }, [isClient, isOpen, flowStage, isReconnect, deviceToReconnect, qrCodeData]);
+  }, [
+    isClient,
+    isOpen,
+    flowStage,
+    isReconnect,
+    deviceToReconnect,
+    qrCodeData,
+    isPolling,
+  ]);
+
+  // Additional monitoring for polling state to recover from failures
+  useEffect(() => {
+    if (!isClient) return;
+
+    // Only apply when dialog is open and we're on QR code stage
+    if (!isOpen || flowStage !== 'qrcode') return;
+
+    // If we have QR code data and we should be polling but aren't,
+    // this indicates the polling might have stopped unexpectedly
+    if (
+      qrCodeData &&
+      !isPolling &&
+      deviceStatus !== 'CONNECTED' &&
+      deviceStatus !== 'DISCONNECTED'
+    ) {
+      console.log('Detected polling has stopped unexpectedly - recovering');
+      // Restart polling with a small delay
+      const recoveryTimer = setTimeout(() => {
+        if (!isPolling) startPolling();
+      }, 1000);
+
+      return () => clearTimeout(recoveryTimer);
+    }
+  }, [isClient, isOpen, qrCodeData, isPolling, deviceStatus, flowStage]);
   // Handle policy confirmation
   const handlePolicyConfirm = async () => {
     // First move to QR code stage
@@ -513,7 +666,9 @@ export function DeviceConnectionDialog({
                       <div className="flex flex-col items-center justify-center h-48 w-48">
                         <QrCode className="h-12 w-12 text-primary mb-4" />
                         <p className="text-sm text-muted-foreground">
-                          Waiting for QR code...
+                          {isReconnect
+                            ? `Preparing to reconnect device...`
+                            : `Waiting for QR code...`}
                         </p>
                       </div>
                     );
@@ -527,33 +682,47 @@ export function DeviceConnectionDialog({
                 <p className="text-center text-sm text-muted-foreground mt-4">
                   {connectedDevices} of {maxDevices} devices connected
                 </p>
-              )}
+              )}{' '}
             <p className="text-center text-sm text-muted-foreground mt-2">
-              Scan this QR code with your{' '}
-              {deviceToReconnect?.type === 'desktop'
-                ? 'computer'
-                : 'mobile device'}{' '}
-              to complete the connection.
-            </p>
-            {/* Progress bar for QR code expiration */}
+              {isReconnect
+                ? `Scan this QR code with your ${
+                    deviceToReconnect?.type === 'desktop'
+                      ? 'computer'
+                      : 'mobile device'
+                  } to reconnect.`
+                : `Scan this QR code with your device to complete the connection.`}
+            </p>{' '}
+            {/* Progress bar for QR code expiration or loading indicator for initializing */}
             <div className="w-full mt-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-muted-foreground">
-                  QR Code{' '}
-                  {deviceStatus === 'INITIALIZING' ? 'connecting' : 'expires'}{' '}
-                  in:
-                </span>
-                <span className="text-sm font-medium">
-                  {Math.max(0, MAX_RETRIES - retryCount)} of {MAX_RETRIES}{' '}
-                  attempts
-                </span>
-              </div>
-              <Progress value={progress} className="h-2" />
-              <p className="text-xs text-center text-muted-foreground mt-2">
-                {deviceStatus === 'INITIALIZING'
-                  ? 'Device is connecting... Please wait'
-                  : 'QR code will refresh automatically if not scanned in time'}
-              </p>
+              {deviceStatus === 'INITIALIZING' ? (
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span className="text-sm font-medium">Connecting...</span>
+                  </div>{' '}
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    {isReconnect
+                      ? `Reconnecting device. Please wait.`
+                      : `Device is initializing connection. Please wait.`}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-muted-foreground">
+                      QR Code expires in:
+                    </span>
+                    <span className="text-sm font-medium">
+                      {Math.max(0, MAX_RETRIES - retryCount)} of {MAX_RETRIES}{' '}
+                      attempts
+                    </span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    QR code will refresh automatically if not scanned in time
+                  </p>
+                </>
+              )}
             </div>
           </div>{' '}
           <DialogFooter className="flex flex-col sm:flex-row gap-3">
