@@ -4,7 +4,6 @@ import { useState } from 'react';
 import ParaphraseList from '@/components/dashboard/paraphrase-list';
 import broadcastService from '@/services/broadcast.service';
 import z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Contact } from '@/services/broadcast.service';
 import BroadcastContactManagement from '@/components/dashboard/broadcast-contact-management';
@@ -12,6 +11,7 @@ import { BroadcastSendConfirm } from '@/components/dashboard/broadcast-send-conf
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { PreviewMessage } from '@/components/dashboard/preview-message';
 
 // Message validation schema
 const messageSchema = z.object({
@@ -491,6 +491,13 @@ export default function BroadcastPage() {
             >
               Reset
             </Button>
+            <PreviewMessage
+              message={messageContent || 'This is preview message'}
+              image={includeImage ? imagePreviewUrl ?? undefined : undefined}
+            />
+            <Button type="button" variant={'outline'}>
+              Schedule Broadcast
+            </Button>
             <Button
               type="button"
               disabled={generateLoading || sendLoading}
@@ -523,9 +530,6 @@ export default function BroadcastPage() {
               ) : (
                 'Send Broadcast Now'
               )}
-            </Button>
-            <Button type="button" variant={'outline'}>
-              Schedule Broadcast
             </Button>
           </div>
         </div>
