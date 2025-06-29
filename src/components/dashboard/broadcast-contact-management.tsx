@@ -16,7 +16,14 @@ interface Contact {
   selected: boolean;
 }
 
-export default function BroadcastContactManagement() {
+// Add prop type for callback
+type BroadcastContactManagementProps = {
+  onContactsChange?: (contacts: Contact[]) => void;
+};
+
+export default function BroadcastContactManagement({
+  onContactsChange,
+}: BroadcastContactManagementProps) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   // Track selected contacts count
   const [selectedCount, setSelectedCount] = useState(0);
@@ -36,7 +43,11 @@ export default function BroadcastContactManagement() {
     const count = contacts.filter((c) => c.selected).length;
     setSelectedCount(count);
     setAllSelected(count > 0 && count === contacts.length);
-  }, [contacts]);
+    // Notify parent of all contacts
+    if (onContactsChange) {
+      onContactsChange(contacts);
+    }
+  }, [contacts, onContactsChange]);
 
   // Debounce search input
   useEffect(() => {

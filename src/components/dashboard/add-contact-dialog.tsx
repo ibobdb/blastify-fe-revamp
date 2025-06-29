@@ -8,6 +8,8 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 interface AddContactDialogProps {
   isOpen: boolean;
@@ -89,9 +91,9 @@ export default function AddContactDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1">
+            <Label htmlFor="name" className="block text-sm font-medium mb-1">
               Name
-            </label>
+            </Label>
             <input
               id="name"
               type="text"
@@ -103,9 +105,9 @@ export default function AddContactDialog({
             />
           </div>
           <div>
-            <label htmlFor="number" className="block text-sm font-medium mb-1">
+            <Label htmlFor="number" className="block text-sm font-medium mb-1">
               Phone Number
-            </label>
+            </Label>
             <input
               id="number"
               type="text"
@@ -122,37 +124,36 @@ export default function AddContactDialog({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <button
+            <Button
+              type="button"
+              variant="outline"
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 border rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              type="button"
             >
               Cancel
-            </button>
+            </Button>
           </DialogClose>
-          <button
+          <Button
             type="button"
             onClick={() => handleCreateContact(false)}
             disabled={
               isLoading || !!numberError || !name.trim() || !number.trim()
             }
-            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
           >
             {isLoading ? <Loader2 size={14} className="animate-spin" /> : null}
             Create
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
             onClick={() => handleCreateContact(true)}
             disabled={
               isLoading || !!numberError || !name.trim() || !number.trim()
             }
-            className="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
           >
             {isLoading ? <Loader2 size={14} className="animate-spin" /> : null}
             Create & Add Another
-          </button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

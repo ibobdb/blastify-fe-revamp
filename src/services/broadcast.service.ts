@@ -8,16 +8,13 @@ const broadcastLogger = logger.child('BroadcastService');
 export interface BroadcastMessage {
   content: string;
   numbers: string[];
-  enableMedia?: boolean;
-  mediaData?: string;
-  enableParaphrasing?: boolean;
+  media?: File | string | null; // File or URL of the media to send
   variations?: string[];
-  enableSchedule?: boolean;
   scheduleTime?: string;
 }
 
 export interface BroadcastSendResponse {
-  success: boolean;
+  status: boolean;
   message: string;
   data: {
     messageCount: number;
@@ -70,20 +67,22 @@ const broadcastService = {
       const payload = {
         content: broadcastData.content,
         numbers: broadcastData.numbers,
-        enableMedia: broadcastData.enableMedia || false,
-        mediaData: broadcastData.mediaData || '',
-        enableParaphrasing: broadcastData.enableParaphrasing || false,
+        media: broadcastData.media || null,
         variations: broadcastData.variations || [],
-        enableSchedule: broadcastData.enableSchedule || false,
         scheduleTime: broadcastData.scheduleTime || '',
       };
 
       // Send the request to the API
       const response = await api.post<BroadcastSendResponse>(
         '/message/send-messages',
-        payload
+        payload,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data', // atau header lain sesuai kebutuhan
+          },
+        }
       );
-      console.log('Broadcast response:', response.data);
+
       // Log the response
       broadcastLogger.info('Broadcast message sent successfully', { response });
 

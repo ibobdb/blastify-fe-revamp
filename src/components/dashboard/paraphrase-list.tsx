@@ -51,6 +51,7 @@ interface ParaphraseProps {
   variations: string[];
   isLoading?: boolean;
   type?: 'random' | 'select';
+  onParaphrasesChange?: (paraphrases: string[]) => void;
 }
 export default function ParaphraseList(props: ParaphraseProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -87,7 +88,16 @@ export default function ParaphraseList(props: ParaphraseProps) {
         }))
       );
     }
-  }, [props.variations]); // Function to open edit dialog
+  }, [props.variations]);
+
+  // Notify parent when paraphrases change
+  useEffect(() => {
+    if (props.onParaphrasesChange) {
+      props.onParaphrasesChange(paraphrases.map((p) => p.paraphrased));
+    }
+  }, [paraphrases]);
+
+  // Function to open edit dialog
   const handleEdit = (id: string) => {
     const itemToEdit = paraphrases.find((item) => item.id === id);
     if (itemToEdit) {
