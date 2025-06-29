@@ -35,7 +35,19 @@ export interface ParaphraseResponse {
     variations: string[];
   };
 }
+export interface Contact {
+  name: string;
+  number: string;
+}
 
+export interface ImportContactResponse {
+  status: string;
+  message: string;
+  data: {
+    count: number;
+    contacts: Contact[];
+  };
+}
 const broadcastService = {
   sendBroadcast: async (
     broadcastData: BroadcastMessage
@@ -96,6 +108,20 @@ const broadcastService = {
       return response.data;
     } catch (error) {
       broadcastLogger.error('Failed to generate paraphrase', { error });
+      throw error;
+    }
+  },
+  importContact: async (): Promise<ImportContactResponse> => {
+    try {
+      broadcastLogger.info('Importing contacts');
+      // Send the request to the API
+      const response = await api.get<ImportContactResponse>(
+        '/client/get-contact'
+      );
+      // broadcastLogger.info('Contacts imported successfully', { response });
+      return response.data;
+    } catch (error) {
+      broadcastLogger.error('Failed to import contacts', { error });
       throw error;
     }
   },

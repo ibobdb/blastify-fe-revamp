@@ -6,6 +6,7 @@ import broadcastService from '@/services/broadcast.service';
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import BroadcastContactManagement from '@/components/dashboard/broadcast-contact-management';
 
 // Message validation schema
 const messageSchema = z.object({
@@ -172,59 +173,7 @@ export default function BroadcastPage() {
                   </h3>
                 </div>
 
-                <div className="border rounded-md p-3  max-h-[350px] min-h-[150px] dark:bg-gray-700 overflow-auto">
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="flex gap-2 items-center">
-                      <div className="w-[200px]">
-                        <input
-                          type="search"
-                          placeholder="Search contacts..."
-                          className="w-full px-3 py-2 border rounded-md text-sm"
-                        />
-                      </div>
-                      <button className="p-2 rounded-md border hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                        <ImportIcon size={16} />
-                      </button>
-                      <button className="p-2 rounded-md border hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-red-600">
-                        <TrashIcon size={16} />
-                      </button>
-                    </div>
-                    <div className="text-xs text-gray-500 text-right">
-                      <span className="font-medium">5</span> contacts
-                    </div>
-                  </div>
-                  {/* Table for contacts */}
-                  <div className="min-w-full">
-                    <div className="bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider grid grid-cols-5 gap-2 p-2 border-b-1 ">
-                      <div className="col-span-4">Contact</div>
-                      <div className="col-span-1 text-right">Action</div>
-                    </div>
-                    <div className="space-y-1 mt-1">
-                      {/* Sample contacts - in a real app these would come from your data source */}
-                      {(
-                        [
-                          { id: 1, number: '+62 812-3456-7890' },
-                          { id: 2, number: '+62 813-9876-5432' },
-                          { id: 3, number: '+62 817-5555-1234' },
-                          { id: 4, number: '+62 878-1111-2222' },
-                          { id: 5, number: '+62 896-3333-4444' },
-                        ] as const
-                      ).map((contact) => (
-                        <div
-                          key={contact.id}
-                          className="grid grid-cols-5 gap-2 p-2 bg-white dark:bg-gray-900 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                        >
-                          <div className="col-span-4">{contact.number}</div>
-                          <div className="col-span-1 text-right">
-                            <button className="text-red-600 hover:text-red-800 transition-colors">
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <BroadcastContactManagement />
               </div>
             </div>
           </div>
