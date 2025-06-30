@@ -1,5 +1,14 @@
 'use client';
-import { ImportIcon, TrashIcon, Loader2Icon } from 'lucide-react';
+import {
+  ImportIcon,
+  TrashIcon,
+  TimerIcon,
+  Loader2Icon,
+  Globe2,
+  MenuIcon,
+  CogIcon,
+  ChevronDown,
+} from 'lucide-react';
 import { useState } from 'react';
 import ParaphraseList from '@/components/dashboard/paraphrase-list';
 import broadcastService from '@/services/broadcast.service';
@@ -12,6 +21,22 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PreviewMessage } from '@/components/dashboard/preview-message';
+import { SchedulerDialog } from '@/components/dashboard/scheduler-dialog';
+import { ScheduleResponse } from '@/components/dashboard/broadcast-send-confirm';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Message validation schema
 const messageSchema = z.object({
@@ -44,10 +69,12 @@ export default function BroadcastPage() {
   const [includeImage, setIncludeImage] = useState(false);
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [confirmWithScheduler, setConfirmWithScheduler] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] =
+    useState<ScheduleResponse | null>(null);
 
   // Reset all state handler
   const resetAllState = () => {
-    console.log('Resetting all state');
     setMessageContent('');
     setContacts([]);
     setSelectedImage(null);
@@ -58,6 +85,7 @@ export default function BroadcastPage() {
     setFinalParaphrase([]);
     setVariationType('random');
     reset();
+    toast.success('Form reset successfully');
   };
 
   // Form setup with React Hook Form
@@ -113,10 +141,11 @@ export default function BroadcastPage() {
   const handleContacts = (contacts: Contact[]) => {
     setContacts(contacts);
   };
-  const handleSendBroadcast = async () => {
+
+  const handleSendBroadcast = async (sch?: ScheduleResponse) => {
     setSendLoading(true);
     try {
-      const validationResult = await validationData();
+      const validationResult = await validationData(sch);
       if (!validationResult) {
         setSendLoading(false);
         return;
@@ -128,13 +157,14 @@ export default function BroadcastPage() {
         setSendLoading(false);
         throw new Error('Failed to send broadcast message');
       }
+      console.log('Broadcast data to send:', validationResult);
     } catch (error) {
       console.error('Error sending broadcast:', error);
     } finally {
       setSendLoading(false);
     }
   };
-  const validationData = async () => {
+  const validationData = async (isSch?: ScheduleResponse) => {
     try {
       if (!messageContent || messageContent.trim().length < 1) {
         throw new Error('Message content is required.');
@@ -157,6 +187,16 @@ export default function BroadcastPage() {
       }
       if (enableParaphrase) {
         result.variations = finalParaphrase;
+      }
+      if (isSch?.status) {
+        // Format the date to local ISO string (YYYY-MM-DDTHH:mm)
+        const localDate = new Date(isSch.date);
+        const tzOffset = localDate.getTimezoneOffset() * 60000;
+        const localISO = new Date(localDate.getTime() - tzOffset)
+          .toISOString()
+          .slice(0, 16);
+        result.scheduleDate = String(localISO);
+        // result.scheduleDate = '2025-06-30T21:40:00';
       }
       return result;
     } catch (error) {
@@ -484,60 +524,110 @@ export default function BroadcastPage() {
         </div>
         <div className="flex justify-end w-full mt-6">
           <div className="flex gap-3">
-            <Button
-              type="button"
-              variant={'destructive'}
-              onClick={resetAllState}
-            >
-              Reset
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <CogIcon size={14} className="mr-2" />
+                  More
+                  <ChevronDown size={14} className="ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="start">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={resetAllState}
+                  >
+                    Reset
+                    <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <PreviewMessage
               message={messageContent || 'This is preview message'}
               image={includeImage ? imagePreviewUrl ?? undefined : undefined}
             />
+            {/* <SchedulerDialog />
             <Button type="button" variant={'outline'}>
               Schedule Broadcast
-            </Button>
-            <Button
-              type="button"
-              disabled={generateLoading || sendLoading}
-              onClick={async () => {
-                setSendLoading(true);
-                await new Promise((resolve) => setTimeout(resolve, 700));
-                setSendLoading(false);
-                if (!messageContent || messageContent.trim().length === 0) {
-                  toast.warning('Message content cannot be empty.');
-                  return;
-                }
-                if (!contacts || contacts.length === 0) {
-                  toast.error('Please add at least one contact.');
-                  return;
-                }
-                if (includeImage && !selectedImage) {
-                  toast.error(
-                    'Please select an image to include in the broadcast.'
-                  );
-                  return;
-                }
-                setIsConfirmOpen(true);
-              }}
-            >
-              {sendLoading ? (
-                <>
-                  <Loader2Icon size={16} className="animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Send Broadcast Now'
-              )}
-            </Button>
+            </Button> */}
+            {/* Combined Button Group */}
+            <div className="inline-flex gap-0.25">
+              <Button
+                type="button"
+                className="rounded-l-sm rounded-r-none"
+                disabled={sendLoading}
+                onClick={async () => {
+                  setSendLoading(true);
+                  await new Promise((resolve) => setTimeout(resolve, 700));
+                  setSendLoading(false);
+                  if (!messageContent || messageContent.trim().length === 0) {
+                    toast.warning('Message content cannot be empty.');
+                    return;
+                  }
+                  if (!contacts || contacts.length === 0) {
+                    toast.error('Please add at least one contact.');
+                    return;
+                  }
+                  if (includeImage && !selectedImage) {
+                    toast.error(
+                      'Please select an image to include in the broadcast.'
+                    );
+                    return;
+                  }
+                  setIsConfirmOpen(true);
+                  setConfirmWithScheduler(false); // Set to false for immediate send
+                }}
+              >
+                {sendLoading ? (
+                  <>
+                    <Loader2Icon size={16} className="animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  'Send Broadcast Now'
+                )}
+              </Button>
+              <Button
+                type="button"
+                className="rounded-l-none rounded-r-sm"
+                disabled={sendLoading}
+                onClick={async () => {
+                  setSendLoading(true);
+                  await new Promise((resolve) => setTimeout(resolve, 700));
+                  setSendLoading(false);
+                  if (!messageContent || messageContent.trim().length === 0) {
+                    toast.warning('Message content cannot be empty.');
+                    return;
+                  }
+                  if (!contacts || contacts.length === 0) {
+                    toast.error('Please add at least one contact.');
+                    return;
+                  }
+                  if (includeImage && !selectedImage) {
+                    toast.error(
+                      'Please select an image to include in the broadcast.'
+                    );
+                    return;
+                  }
+                  setIsConfirmOpen(true);
+                  setConfirmWithScheduler(true); // Set to true if scheduling is implemented
+                }}
+              >
+                <TimerIcon size={14} />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
       <BroadcastSendConfirm
         isOpen={isConfirmOpen}
+        isScheduled={confirmWithScheduler} // Set to true if scheduling is implemented
         onClose={() => setIsConfirmOpen(false)}
-        onConfirm={handleSendBroadcast}
+        onConfirm={(value) => {
+          handleSendBroadcast(value);
+        }}
         onReset={resetAllState}
       />
     </div>
