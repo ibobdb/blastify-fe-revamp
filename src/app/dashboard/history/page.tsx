@@ -1,4 +1,5 @@
 import { HistoryTable } from '@/components/dashboard/history-table';
+import { HistorySummary } from '@/components/dashboard/history-summary';
 
 export default function HistoryPage() {
   return (
@@ -14,6 +15,13 @@ export default function HistoryPage() {
           </p>
         </div>
       </div>
+
+      {/* Summary cards outside the white container */}
+      <div className="mb-6">
+        <HistorySummary />
+      </div>
+
+      {/* Data table inside the white container */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <HistoryTable />
       </div>

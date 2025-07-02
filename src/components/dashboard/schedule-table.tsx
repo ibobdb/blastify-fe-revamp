@@ -61,12 +61,21 @@ export function ScheduleTable() {
     {
       accessorKey: 'id',
       header: 'ID',
-      size: 10,
-      cell: ({ row }) => (
-        <span className="font-mono text-muted-foreground text-xs truncate">
-          {row.getValue('id')}
-        </span>
-      ),
+      size: 100,
+      maxSize: 100,
+      cell: ({ row }) => {
+        const id = row.getValue('id') as string;
+        return (
+          <div className="w-20">
+            <span
+              className="font-mono text-muted-foreground text-xs truncate block"
+              title={id}
+            >
+              {id.slice(0, 8)}...
+            </span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'scheduleDate',
@@ -261,6 +270,8 @@ export function ScheduleTable() {
         handleFetchSchedules(1, pagination.limit, value);
       }}
       onRefresh={() => handleFetchSchedules()}
+      title="Scheduled Messages Overview"
+      description="View and manage your scheduled messages. Cancel or modify schedules as needed."
     />
   );
 }

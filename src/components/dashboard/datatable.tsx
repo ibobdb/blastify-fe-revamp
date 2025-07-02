@@ -68,10 +68,14 @@ export function DataTable<TData, TValue>({
   loading = false,
   onSearch,
   onRowClick,
+  title = 'Messages Overview',
+  description = 'Showing all broadcast messages and their status',
 }: DataTableProps<TData, TValue> & {
   onRefresh?: () => void;
   onSearch?: (value: string) => void;
   onRowClick?: (row: TData) => void;
+  title?: string;
+  description?: string;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -111,84 +115,100 @@ export function DataTable<TData, TValue>({
   };
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 gap-2">
-        <form onSubmit={handleSearchSubmit}>
-          <Input
-            ref={inputRef}
-            placeholder="Search..."
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            className="max-w-sm"
-          />
-        </form>
-        <Button
-          variant="outline"
-          size={'sm'}
-          className="ml-auto cursor-pointer"
-          onClick={onRefresh}
-          aria-label="Refresh"
-          disabled={loading}
-        >
-          <RefreshCw className="h-4 w-4" />
-          {loading ? 'Refreshing...' : 'Refresh'}
-        </Button>
-      </div>
-      <div className="rounded-md border relative min-h-[200px] max-h-[600px] overflow-auto">
-        <Table>
-          <TableHeader className="sticky top-0 bg-background z-10">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="border-b bg-background">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody
-            className={loading ? 'opacity-20 pointer-events-none' : ''}
+      <div className="flex justify-between py-4 gap-2">
+        <div className="grid">
+          <span className="font-semibold text-base mr-2">{title}</span>
+          <span className="text-xs text-muted-foreground">{description}</span>
+        </div>
+        <div className="flex gap-2">
+          <form onSubmit={handleSearchSubmit} className="ml-4 mr-2">
+            <Input
+              ref={inputRef}
+              placeholder="Search..."
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              className="max-w-sm h-8"
+            />
+          </form>
+          <Button
+            variant="outline"
+            size={'sm'}
+            className="ml-auto cursor-pointer h-8 px-2 text-xs"
+            onClick={onRefresh}
+            aria-label="Refresh"
+            disabled={loading}
           >
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  onClick={() => onRowClick?.(row.original)}
-                  className={
-                    onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''
-                  }
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+            <RefreshCw className="h-3 w-3 mr-1" />
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        </div>
+      </div>
+
+      <div className="rounded-md border relative min-h-[200px] max-h-[600px] overflow-auto">
+        <div className="overflow-x-auto">
+          <Table className="min-w-full">
+            <TableHeader className="sticky top-0 bg-background z-10">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="border-b bg-background h-8 px-2 py-1 text-xs font-medium whitespace-nowrap"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody
+              className={loading ? 'opacity-20 pointer-events-none' : ''}
+            >
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                    onClick={() => onRowClick?.(row.original)}
+                    className={`h-8 ${
+                      onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''
+                    }`}
+                  >
+                    {' '}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className="px-2 py-1 text-xs whitespace-nowrap"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-16 text-center text-xs"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-      <UiPagination className="mt-4">
-        <PaginationContent>
+      <UiPagination className="mt-2">
+        <PaginationContent className="gap-1">
           <PaginationItem>
             <PaginationPrevious
               href="#"

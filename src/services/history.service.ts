@@ -7,6 +7,7 @@ export interface HistoryResponse {
   data: {
     data: DataMessage[];
     pagination: Pagination;
+    summary: HistorySummary;
   };
 }
 export interface DataMessage {
@@ -30,6 +31,34 @@ interface HistoryParams {
   limit?: number;
   search?: string;
   sortBy?: string;
+}
+
+interface PeriodStats {
+  days: number;
+  count: number;
+  percentage: number;
+  changeFromPrevious: number;
+}
+
+interface StatusSummary {
+  status: string;
+  total: number;
+  percentage: number;
+  periods: {
+    last7Days: PeriodStats;
+    last30Days: PeriodStats;
+    last90Days: PeriodStats;
+  };
+}
+
+export interface HistorySummary {
+  total: number;
+  byStatus: StatusSummary[];
+  byPeriod: {
+    last7Days: PeriodStats;
+    last30Days: PeriodStats;
+    last90Days: PeriodStats;
+  };
 }
 export const historyService = {
   getHistory: async (params: HistoryParams): Promise<HistoryResponse> => {

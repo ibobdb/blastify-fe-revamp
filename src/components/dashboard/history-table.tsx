@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { HistoryDetailDialog } from '@/components/dashboard/history-detail-dialog';
-import { ArrowUpDown, Eye, Copy, MoreHorizontal } from 'lucide-react';
+import { ArrowUpDown, Eye, Copy, MoreHorizontal, Info } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,28 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+
+const StatusLegend = () => {
+  const statusItems = [
+    { label: 'Sent', color: 'bg-blue-500', variant: 'info' as const },
+    { label: 'Delivered', color: 'bg-green-500', variant: 'success' as const },
+    { label: 'Read', color: 'bg-green-600', variant: 'success' as const },
+    { label: 'Failed', color: 'bg-red-500', variant: 'destructive' as const },
+  ];
+
+  return (
+    <div className="flex items-center gap-4 mb-4 p-3 bg-muted/30 rounded-lg border">
+      <div className="flex items-center gap-4">
+        {statusItems.map((item) => (
+          <div key={item.label} className="flex items-center gap-2">
+            <div className={`w-3 h-3 rounded-full ${item.color}`} />
+            <span className="text-sm">{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export function HistoryTable() {
   const [data, setData] = useState<DataMessage[]>([]);
@@ -66,8 +88,8 @@ export function HistoryTable() {
     {
       accessorKey: 'id',
       header: 'ID',
-      size: 80,
-      maxSize: 80,
+      size: 100,
+      maxSize: 100,
       cell: ({ row }) => {
         const id = row.getValue('id') as string;
         return (
@@ -76,7 +98,7 @@ export function HistoryTable() {
               className="font-mono text-muted-foreground text-xs truncate block"
               title={id}
             >
-              {id}
+              {id.slice(0, 8)}...
             </span>
           </div>
         );
@@ -85,21 +107,25 @@ export function HistoryTable() {
     {
       accessorKey: 'number',
       header: 'Phone Number',
+      size: 140,
+      maxSize: 140,
       cell: ({ row }) => (
-        <span className="font-mono">{row.getValue('number')}</span>
+        <span className="font-mono text-xs">{row.getValue('number')}</span>
       ),
     },
     {
       accessorKey: 'content',
       header: 'Message',
+      size: 200,
+      maxSize: 250,
       cell: ({ row }) => {
         const content = row.getValue('content') as string;
         return (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="max-w-[200px] cursor-help">
-                  <span className="truncate block">{content}</span>
+                <div className="max-w-[180px] cursor-help">
+                  <span className="truncate block text-xs">{content}</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
@@ -113,6 +139,8 @@ export function HistoryTable() {
     {
       accessorKey: 'status',
       header: 'Status',
+      size: 100,
+      maxSize: 100,
       cell: ({ row }) => {
         const status = row.getValue('status') as string;
         return (
@@ -132,6 +160,7 @@ export function HistoryTable() {
                 ? 'muted'
                 : 'default'
             }
+            className="text-xs"
           >
             {status}
           </Badge>
@@ -141,6 +170,8 @@ export function HistoryTable() {
     {
       accessorKey: 'ackStatus',
       header: 'Delivery Status',
+      size: 120,
+      maxSize: 120,
       cell: ({ row }) => {
         const ackStatus = row.getValue('ackStatus') as number | string | null;
         if (ackStatus === null || ackStatus === undefined)
@@ -170,28 +201,48 @@ export function HistoryTable() {
 
         const { variant, label } = getStatusInfo(status);
 
-        return <Badge variant={variant}>{label}</Badge>;
+        return (
+          <Badge variant={variant} className="text-xs">
+            {label}
+          </Badge>
+        );
       },
     },
     {
       accessorKey: 'source',
       header: 'Source',
+      size: 80,
+      maxSize: 80,
       cell: ({ row }) => {
         const source = row.getValue('source') as string;
         const variant =
           source === 'WEB' ? 'info' : source === 'API' ? 'outline' : 'default';
-        return <Badge variant={variant}>{source}</Badge>;
+        return (
+          <Badge variant={variant} className="text-xs">
+            {source}
+          </Badge>
+        );
       },
     },
     {
       accessorKey: 'scheduleDate',
       header: 'Schedule Date',
+      size: 140,
+      maxSize: 140,
+      enableHiding: true,
       cell: ({ row }) => {
         const value = row.getValue('scheduleDate');
         const date = value ? new Date(value as string) : null;
         return (
-          <span className="text-sm">
-            {date && !isNaN(date.getTime()) ? date.toLocaleString() : '-'}
+          <span className="text-xs">
+            {date && !isNaN(date.getTime())
+              ? date.toLocaleDateString() +
+                ' ' +
+                date.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : '-'}
           </span>
         );
       },
@@ -202,17 +253,27 @@ export function HistoryTable() {
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="p-0 text-xs h-6"
         >
           Created At
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
+      size: 140,
+      maxSize: 140,
       cell: ({ row }) => {
         const value = row.getValue('createdAt');
         const date = value ? new Date(value as string) : null;
         return (
-          <span className="text-sm">
-            {date && !isNaN(date.getTime()) ? date.toLocaleString() : '-'}
+          <span className="text-xs">
+            {date && !isNaN(date.getTime())
+              ? date.toLocaleDateString() +
+                ' ' +
+                date.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : '-'}
           </span>
         );
       },
@@ -222,6 +283,8 @@ export function HistoryTable() {
     {
       id: 'actions',
       enableHiding: false,
+      size: 50,
+      maxSize: 50,
       cell: ({ row }) => {
         const message = row.original;
 
@@ -248,28 +311,28 @@ export function HistoryTable() {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button variant="ghost" className="h-6 w-6 p-0">
                 <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
+                <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={handleViewDetails}>
+            <DropdownMenuContent align="end" className="text-xs">
+              <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={handleViewDetails} className="text-xs">
                 View Details
-                <Eye className="ml-2 h-4 w-4" />
+                <Eye className="ml-2 h-3 w-3" />
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyId}>
+              <DropdownMenuItem onClick={handleCopyId} className="text-xs">
                 Copy Message ID
-                <Copy className="ml-2 h-4 w-4" />
+                <Copy className="ml-2 h-3 w-3" />
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyNumber}>
+              <DropdownMenuItem onClick={handleCopyNumber} className="text-xs">
                 Copy Phone Number
-                <Copy className="ml-2 h-4 w-4" />
+                <Copy className="ml-2 h-3 w-3" />
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyContent}>
+              <DropdownMenuItem onClick={handleCopyContent} className="text-xs">
                 Copy Message
-                <Copy className="ml-2 h-4 w-4" />
+                <Copy className="ml-2 h-3 w-3" />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -339,26 +402,33 @@ export function HistoryTable() {
 
   return (
     <>
-      <DataTable
-        data={data}
-        columns={columns}
-        pagination={{
-          pagination,
-          onPageChange: (page: number) =>
-            setPagination((prev) => ({ ...prev, page: page + 1 })),
-          onPageSizeChange: (limit: number) =>
-            setPagination((prev) => ({ ...prev, limit, page: 1 })),
-        }}
-        loading={loading}
-        onSearch={(value: string) => {
-          handleFetchHistory(1, pagination.limit, value);
-        }}
-        onRefresh={() => handleFetchHistory()}
-        onRowClick={(row: DataMessage) => {
-          setSelectedMessage(row);
-          setIsDialogOpen(true);
-        }}
-      />
+      <div className="space-y-6">
+        {/* <StatusLegend /> */}
+        <div className="overflow-x-auto">
+          <DataTable
+            data={data}
+            columns={columns}
+            pagination={{
+              pagination,
+              onPageChange: (page: number) =>
+                setPagination((prev) => ({ ...prev, page: page + 1 })),
+              onPageSizeChange: (limit: number) =>
+                setPagination((prev) => ({ ...prev, limit, page: 1 })),
+            }}
+            loading={loading}
+            onSearch={(value: string) => {
+              handleFetchHistory(1, pagination.limit, value);
+            }}
+            onRefresh={() => handleFetchHistory()}
+            onRowClick={(row: DataMessage) => {
+              setSelectedMessage(row);
+              setIsDialogOpen(true);
+            }}
+            title="Messages Overview"
+            description="View the history of your sent blast messages. Track delivery status, recipients, and message details all in one place."
+          />
+        </div>
+      </div>
 
       <HistoryDetailDialog
         open={isDialogOpen}
