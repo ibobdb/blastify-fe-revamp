@@ -38,6 +38,7 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState<ConfirmDialogOptions | null>(null);
 
   const confirm = useCallback((options: ConfirmDialogOptions) => {
@@ -48,9 +49,16 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({
         confirmText: options.confirmText || 'Confirm',
         cancelText: options.cancelText || 'Cancel',
         ...options,
-        onConfirm: () => {
+        onConfirm: async () => {
           if (options.onConfirm) {
-            options.onConfirm();
+            setIsLoading(true);
+            try {
+              await options.onConfirm();
+            } catch (error) {
+              console.error('Confirm action failed:', error);
+            } finally {
+              setIsLoading(false);
+            }
           }
           setIsOpen(false);
           resolve(true);
@@ -128,7 +136,12 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{ confirm, confirmInfo, confirmWarning, confirmDanger }}
     >
       {children}
-      <ConfirmDialog open={isOpen} options={options} onOpenChange={setIsOpen} />
+      <ConfirmDialog
+        open={isOpen}
+        options={options}
+        onOpenChange={setIsOpen}
+        isLoading={isLoading}
+      />
     </ConfirmContext.Provider>
   );
 };

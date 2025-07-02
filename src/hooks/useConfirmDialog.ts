@@ -22,6 +22,7 @@ export interface ConfirmDialogOptions {
  */
 export function useConfirmDialog() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState<ConfirmDialogOptions | null>(null);
 
   /**
@@ -35,9 +36,16 @@ export function useConfirmDialog() {
         confirmText: options.confirmText || 'Confirm',
         cancelText: options.cancelText || 'Cancel',
         ...options,
-        onConfirm: () => {
+        onConfirm: async () => {
           if (options.onConfirm) {
-            options.onConfirm();
+            setIsLoading(true);
+            try {
+              await options.onConfirm();
+            } catch (error) {
+              console.error('Confirm action failed:', error);
+            } finally {
+              setIsLoading(false);
+            }
           }
           setIsOpen(false);
           resolve(true);
@@ -121,6 +129,7 @@ export function useConfirmDialog() {
 
   return {
     isOpen,
+    isLoading,
     options,
     setIsOpen,
     confirm,

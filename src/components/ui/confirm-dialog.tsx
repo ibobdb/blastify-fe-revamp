@@ -10,7 +10,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, AlertTriangle, Info } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import {
   ConfirmDialogType,
   ConfirmDialogOptions,
@@ -20,6 +20,7 @@ interface ConfirmDialogProps {
   open: boolean;
   options: ConfirmDialogOptions | null;
   onOpenChange: (open: boolean) => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,
   options,
   onOpenChange,
+  isLoading = false,
 }) => {
   if (!options) {
     return null;
@@ -43,6 +45,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     type = 'info',
     confirmText = 'Confirm',
     cancelText = 'Cancel',
+
     onConfirm,
     onCancel,
   } = options;
@@ -89,7 +92,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="flex gap-4 sm:flex-row sm:items-start sm:gap-4">
           <div className={`rounded-full p-2 ${iconContainer}`}>{icon}</div>
@@ -102,10 +105,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </DialogHeader>
 
         <DialogFooter className="mt-4 gap-3 sm:justify-end">
-          <Button variant="outline" onClick={handleCancel}>
+          <Button variant="outline" onClick={handleCancel} disabled={isLoading}>
             {cancelText}
           </Button>
-          <Button variant={confirmVariant} onClick={handleConfirm}>
+          <Button
+            variant={confirmVariant}
+            onClick={handleConfirm}
+            disabled={isLoading}
+          >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {confirmText}
           </Button>
         </DialogFooter>

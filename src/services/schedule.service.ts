@@ -26,6 +26,14 @@ export interface Pagination {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
 }
+export interface ScheduleCancelResponse {
+  status: boolean;
+  message: string;
+  data: {
+    schedulerId: string;
+    messagesCancelled: number;
+  };
+}
 export interface Schedule {
   id: string;
   scheduleDate: string;
@@ -55,12 +63,13 @@ export const scheduleService = {
     return response.data as ScheduleResponse;
   },
 
-  async cancelSchedule(scheduleId: string): Promise<void> {
-    const response = await fetch(`/api/schedules/${scheduleId}/cancel`, {
+  async cancelSchedule(scheduleId: string): Promise<ScheduleCancelResponse> {
+    const response = await api.delete(`/scheduler/${scheduleId}`, {
       method: 'POST',
     });
-    if (!response.ok) {
+    if (!response.data.status) {
       throw new Error('Failed to cancel schedule');
     }
+    return response.data as ScheduleCancelResponse;
   },
 };
