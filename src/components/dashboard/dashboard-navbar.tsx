@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NotificationList } from './notification-list';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,7 +67,7 @@ export function DashboardNavbar({ onMenuClick }: DashboardNavbarProps) {
 
   const userInitials = user?.name ? getUserInitials(user.name) : 'U';
   return (
-    <header className="bg-white dark:bg-gray-950 border-b border-border h-16 flex items-center px-6 md:px-8 justify-between sticky top-0 z-10 shadow-sm">
+    <header className="bg-white dark:bg-gray-950 border-b border-border h-16 flex items-center px-6 md:px-8 justify-between sticky top-0 z-10 shadow-sm py-4">
       {/* Left Side - Menu Button and Search */}
       <div className="flex items-center">
         <Button
@@ -109,9 +110,10 @@ export function DashboardNavbar({ onMenuClick }: DashboardNavbarProps) {
         {/* Quota ADD */}
         <QuotaAddNav />
         {/* Notifications */}
-        <Button variant="ghost" size="icon" aria-label="Notifications">
+        {/* <Button variant="ghost" size="icon" aria-label="Notifications">
           <Bell className="h-5 w-5" />
-        </Button>
+        </Button> */}
+        <NotificationList />
 
         {/* User Profile Dropdown */}
         <DropdownMenu>

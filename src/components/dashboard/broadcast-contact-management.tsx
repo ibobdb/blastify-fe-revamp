@@ -235,7 +235,7 @@ export default function BroadcastContactManagement({
       <div className="flex flex-col min-w-full flex-1">
         {' '}
         {/* Fixed header with selection checkbox */}
-        <div className="bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider grid grid-cols-6 gap-2 p-1.5 border-b sticky top-0 z-10 flex-none">
+        <div className="bg-white dark:bg-gray-800 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider grid grid-cols-6 gap-2 p-1.5 border-b sticky top-0 z-8 flex-none">
           <div className="col-span-1 flex items-center">
             <button
               className="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"

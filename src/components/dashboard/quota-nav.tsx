@@ -93,22 +93,16 @@ export function QuotaNav() {
         <span className="text-sm font-semibold text-blue-600">
           {formatCredits(quotaData.availableBalance)}
         </span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="opacity-60 hover:opacity-100 transition-opacity"
-            >
-              <RefreshCw
-                className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`}
-              />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Refresh credits</p>
-          </TooltipContent>
-        </Tooltip>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          title="Refresh Quota"
+          className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+        >
+          <RefreshCw
+            className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`}
+          />
+        </button>
       </div>
     </TooltipProvider>
   );
