@@ -16,7 +16,10 @@ import z from 'zod';
 import { useForm } from 'react-hook-form';
 import { Contact } from '@/services/broadcast.service';
 import BroadcastContactManagement from '@/components/dashboard/broadcast-contact-management';
-import { BroadcastSendConfirm } from '@/components/dashboard/broadcast-send-confirm';
+import {
+  BroadcastSendConfirm,
+  ConfirmResult,
+} from '@/components/dashboard/broadcast-send-confirm';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -142,65 +145,173 @@ export default function BroadcastPage() {
     setContacts(contacts);
   };
 
-  const handleSendBroadcast = async (sch?: ScheduleResponse) => {
-    setSendLoading(true);
+  const handleSendBroadcast = async (
+    sch?: ScheduleResponse
+  ): Promise<ConfirmResult> => {
     try {
       const validationResult = await validationData(sch);
       if (!validationResult) {
-        setSendLoading(false);
-        return;
+        return {
+          success: false,
+          error: 'Validation failed. Please check your input and try again.',
+        };
       }
+
       // Call the broadcast service to send the message
       const response = await broadcastService.sendBroadcast(validationResult);
+
       if (!response.status) {
-        toast.error('Failed to send broadcast message');
-        setSendLoading(false);
-        throw new Error('Failed to send broadcast message');
+        return {
+          success: false,
+          error:
+            response.message ||
+            'Failed to send broadcast message. Please try again.',
+        };
       }
-      console.log('Broadcast data to send:', validationResult);
+
+      // Determine success message based on whether it's scheduled or immediate
+      const successMessage = sch?.status
+        ? `Broadcast scheduled successfully for ${sch.date.toLocaleString()}`
+        : 'Broadcast sent successfully to all recipients!';
+
+      toast.success(successMessage);
+      console.log('Broadcast data sent:', validationResult);
+
+      return {
+        success: true,
+        message: successMessage,
+      };
     } catch (error) {
       console.error('Error sending broadcast:', error);
-    } finally {
-      setSendLoading(false);
+
+      // Handle different types of errors
+      let errorMessage =
+        'An unexpected error occurred while sending the broadcast.';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
+      // Show toast for immediate feedback
+      toast.error(errorMessage);
+
+      return {
+        success: false,
+        error: errorMessage,
+      };
     }
   };
   const validationData = async (isSch?: ScheduleResponse) => {
     try {
+      // Validate message content
       if (!messageContent || messageContent.trim().length < 1) {
-        throw new Error('Message content is required.');
+        throw new Error('Message content is required and cannot be empty.');
       }
+
+      if (messageContent.trim().length > 4096) {
+        throw new Error(
+          'Message content is too long (maximum 4096 characters).'
+        );
+      }
+
+      // Validate contacts
+      if (!contacts || contacts.length === 0) {
+        throw new Error(
+          'Please add at least one contact to send the broadcast.'
+        );
+      }
+
+      // Validate image if included
       if (includeImage && !selectedImage) {
         throw new Error('Please select an image to include in the broadcast.');
       }
+
+      // Validate image size and type
+      if (includeImage && selectedImage) {
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        if (selectedImage.size > maxSize) {
+          throw new Error('Image file is too large. Maximum size is 2MB.');
+        }
+
+        const allowedTypes = [
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/gif',
+        ];
+        if (!allowedTypes.includes(selectedImage.type)) {
+          throw new Error('Invalid image format. Please use JPG, PNG, or GIF.');
+        }
+      }
+
+      // Validate paraphrase if enabled
       if (enableParaphrase && finalParaphrase.length === 0) {
         throw new Error(
-          'Please generate or select paraphrases before sending the broadcast.'
+          'Please generate and select paraphrases before sending the broadcast.'
         );
       }
+
+      // Validate scheduled date
+      if (isSch?.status) {
+        const now = new Date();
+        const scheduledDate = new Date(isSch.date);
+
+        if (scheduledDate <= now) {
+          throw new Error('Scheduled time must be in the future.');
+        }
+
+        // Check if scheduled time is not too far in the future (e.g., 1 year)
+        const oneYearFromNow = new Date();
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+        if (scheduledDate > oneYearFromNow) {
+          throw new Error(
+            'Cannot schedule broadcasts more than 1 year in advance.'
+          );
+        }
+      }
+
+      // Build the result object
       const result: any = {
-        content: messageContent,
+        content: messageContent.trim(),
         numbers: contacts.map((c) => c.number).join(','),
       };
-      if (includeImage) {
-        // result.media = true;
+
+      // Add media if included
+      if (includeImage && selectedImage) {
         result.media = selectedImage;
       }
-      if (enableParaphrase) {
+
+      // Add variations if paraphrase is enabled
+      if (enableParaphrase && finalParaphrase.length > 0) {
         result.variations = finalParaphrase;
       }
+
+      // Add schedule date if scheduling is enabled
       if (isSch?.status) {
-        // Format the date to local ISO string (YYYY-MM-DDTHH:mm)
         const localDate = new Date(isSch.date);
         const tzOffset = localDate.getTimezoneOffset() * 60000;
         const localISO = new Date(localDate.getTime() - tzOffset)
           .toISOString()
           .slice(0, 16);
-        result.scheduleDate = String(localISO);
-        // result.scheduleDate = '2025-06-30T21:40:00';
+        result.scheduleDate = localISO;
       }
+
       return result;
     } catch (error) {
-      console.error('Error validating data:', error);
+      console.error('Validation error:', error);
+
+      // Show validation errors as toast messages
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Validation failed. Please check your input.');
+      }
+
+      // Return null to indicate validation failure
+      return null;
     }
   };
   return (
@@ -562,6 +673,8 @@ export default function BroadcastPage() {
                   setSendLoading(true);
                   await new Promise((resolve) => setTimeout(resolve, 700));
                   setSendLoading(false);
+
+                  // Basic validation before opening dialog
                   if (!messageContent || messageContent.trim().length === 0) {
                     toast.warning('Message content cannot be empty.');
                     return;
@@ -570,12 +683,7 @@ export default function BroadcastPage() {
                     toast.error('Please add at least one contact.');
                     return;
                   }
-                  if (includeImage && !selectedImage) {
-                    toast.error(
-                      'Please select an image to include in the broadcast.'
-                    );
-                    return;
-                  }
+
                   setIsConfirmOpen(true);
                   setConfirmWithScheduler(false); // Set to false for immediate send
                 }}
@@ -597,6 +705,8 @@ export default function BroadcastPage() {
                   setSendLoading(true);
                   await new Promise((resolve) => setTimeout(resolve, 700));
                   setSendLoading(false);
+
+                  // Basic validation before opening dialog
                   if (!messageContent || messageContent.trim().length === 0) {
                     toast.warning('Message content cannot be empty.');
                     return;
@@ -605,14 +715,9 @@ export default function BroadcastPage() {
                     toast.error('Please add at least one contact.');
                     return;
                   }
-                  if (includeImage && !selectedImage) {
-                    toast.error(
-                      'Please select an image to include in the broadcast.'
-                    );
-                    return;
-                  }
+
                   setIsConfirmOpen(true);
-                  setConfirmWithScheduler(true); // Set to true if scheduling is implemented
+                  setConfirmWithScheduler(true); // Set to true for scheduling
                 }}
               >
                 <TimerIcon size={14} />
@@ -623,11 +728,9 @@ export default function BroadcastPage() {
       </div>
       <BroadcastSendConfirm
         isOpen={isConfirmOpen}
-        isScheduled={confirmWithScheduler} // Set to true if scheduling is implemented
+        isScheduled={confirmWithScheduler}
         onClose={() => setIsConfirmOpen(false)}
-        onConfirm={(value) => {
-          handleSendBroadcast(value);
-        }}
+        onConfirm={handleSendBroadcast}
         onReset={resetAllState}
       />
     </div>
