@@ -10,6 +10,7 @@ type User = {
   id: string;
   name: string;
   email: string;
+  role: string;
   avatar?: string;
 };
 
@@ -53,6 +54,7 @@ const mockUser: User = {
   id: '1',
   name: 'Demo User',
   email: 'demo@example.com',
+  role: 'suhu',
   avatar: 'https://avatars.githubusercontent.com/u/1?v=4',
 };
 
@@ -197,6 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               id: decodedToken.id,
               name: decodedToken.name,
               email: decodedToken.email,
+              role: decodedToken.role || 'user',
               avatar: decodedToken.avatar,
             });
             setIsAuthenticated(true);
