@@ -67,9 +67,11 @@ export function DataTable<TData, TValue>({
   onRefresh,
   loading = false,
   onSearch,
+  onRowClick,
 }: DataTableProps<TData, TValue> & {
   onRefresh?: () => void;
   onSearch?: (value: string) => void;
+  onRowClick?: (row: TData) => void;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -131,13 +133,13 @@ export function DataTable<TData, TValue>({
           {loading ? 'Refreshing...' : 'Refresh'}
         </Button>
       </div>
-      <div className="rounded-md border relative min-h-[200px]">
+      <div className="rounded-md border relative min-h-[200px] max-h-[600px] overflow-auto">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 bg-background z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="border-b bg-background">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -157,6 +159,10 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
+                  onClick={() => onRowClick?.(row.original)}
+                  className={
+                    onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
