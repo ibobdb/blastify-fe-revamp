@@ -289,7 +289,7 @@ export default function BroadcastPage() {
         result.variations = finalParaphrase;
       }
 
-      // Add schedule date if scheduling is enabled
+      // Add schedule date if scheduling
       if (isSch?.status) {
         const localDate = new Date(isSch.date);
         const tzOffset = localDate.getTimezoneOffset() * 60000;
