@@ -20,8 +20,25 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import { notificarionService } from '@/services/notification.service';
 
-interface Notification {
+// Update the local interface to match the service interface
+interface NotificationData {
+  id: string;
+  userId: string;
+  title: string;
+  body: string;
+  type: string;
+  priority: string;
+  data: {
+    reason: string;
+  };
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+}
+
+interface LocalNotification {
   id: string;
   title: string;
   message: string;
@@ -30,87 +47,91 @@ interface Notification {
   isRead: boolean;
   avatar?: string;
   actionType?: 'message' | 'user' | 'system' | 'broadcast' | 'device';
+  priority: string;
 }
 
-const dummyNotifications: Notification[] = [
-  {
-    id: '1',
-    title: 'Message Sent Successfully',
-    message: 'Your broadcast to 250 contacts has been delivered successfully.',
-    type: 'success',
-    timestamp: '2 minutes ago',
-    isRead: false,
-    actionType: 'broadcast',
-  },
-  {
-    id: '2',
-    title: 'New User Registration',
-    message: 'John Doe has registered and is pending verification.',
-    type: 'info',
-    timestamp: '15 minutes ago',
-    isRead: false,
-    actionType: 'user',
-  },
-  {
-    id: '3',
-    title: 'Device Connection Failed',
-    message:
-      'Unable to connect to WhatsApp device. Please check your connection.',
-    type: 'error',
-    timestamp: '1 hour ago',
-    isRead: true,
-    actionType: 'device',
-  },
-  {
-    id: '4',
-    title: 'Scheduled Message',
-    message: 'Your scheduled message for 3:00 PM has been sent.',
-    type: 'success',
-    timestamp: '2 hours ago',
-    isRead: true,
-    actionType: 'message',
-  },
-  {
-    id: '5',
-    title: 'System Maintenance',
-    message: 'System maintenance is scheduled for tonight at 11:00 PM.',
-    type: 'warning',
-    timestamp: '3 hours ago',
-    isRead: false,
-    actionType: 'system',
-  },
-  {
-    id: '6',
-    title: 'Contact Import Complete',
-    message: 'Successfully imported 150 contacts from CSV file.',
-    type: 'success',
-    timestamp: '1 day ago',
-    isRead: true,
-    actionType: 'system',
-  },
-  {
-    id: '7',
-    title: 'Message Delivery Failed',
-    message: 'Failed to deliver message to 5 contacts due to invalid numbers.',
-    type: 'error',
-    timestamp: '2 days ago',
-    isRead: true,
-    actionType: 'broadcast',
-  },
-  {
-    id: '8',
-    title: 'New Message Received',
-    message: 'You have received a new message from a contact.',
-    type: 'info',
-    timestamp: '3 days ago',
-    isRead: true,
-    actionType: 'message',
-  },
-];
+// Helper function to convert API notification to local format
+const convertToLocalNotification = (
+  notification: NotificationData
+): LocalNotification => {
+  // Map notification type to UI type
+  const getUIType = (
+    type: string,
+    priority: string
+  ): LocalNotification['type'] => {
+    switch (type.toLowerCase()) {
+      case 'success':
+        return 'success';
+      case 'error':
+      case 'failed':
+        return 'error';
+      case 'warning':
+        return 'warning';
+      case 'info':
+      default:
+        return priority === 'high' ? 'warning' : 'info';
+    }
+  };
+
+  // Map notification type to action type
+  const getActionType = (type: string): LocalNotification['actionType'] => {
+    switch (type.toLowerCase()) {
+      case 'broadcast':
+        return 'broadcast';
+      case 'user':
+      case 'registration':
+        return 'user';
+      case 'device':
+      case 'connection':
+        return 'device';
+      case 'message':
+        return 'message';
+      case 'system':
+      case 'maintenance':
+        return 'system';
+      default:
+        return 'system';
+    }
+  };
+
+  // Format timestamp
+  const formatTimestamp = (createdAt: string): string => {
+    const now = new Date();
+    const notificationDate = new Date(createdAt);
+    const diffInMinutes = Math.floor(
+      (now.getTime() - notificationDate.getTime()) / (1000 * 60)
+    );
+
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60)
+      return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24)
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7)
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+
+    return notificationDate.toLocaleDateString();
+  };
+
+  return {
+    id: notification.id,
+    title: notification.title,
+    message: notification.body,
+    type: getUIType(notification.type, notification.priority),
+    timestamp: formatTimestamp(notification.createdAt),
+    isRead: notification.isRead,
+    priority: notification.priority,
+    actionType: getActionType(notification.type),
+  };
+};
 
 const getNotificationIcon = (
-  type: Notification['type'],
-  actionType?: Notification['actionType']
+  type: LocalNotification['type'],
+  actionType?: LocalNotification['actionType']
 ) => {
   if (actionType === 'broadcast') return <Zap className="h-4 w-4" />;
   if (actionType === 'user') return <UserPlus className="h-4 w-4" />;
@@ -131,7 +152,7 @@ const getNotificationIcon = (
   }
 };
 
-const getBadgeVariant = (type: Notification['type']) => {
+const getBadgeVariant = (type: LocalNotification['type']) => {
   switch (type) {
     case 'success':
       return 'default';
@@ -148,8 +169,89 @@ const getBadgeVariant = (type: Notification['type']) => {
 export function NotificationList() {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [notifications, setNotifications] = useState<LocalNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
-  const unreadCount = dummyNotifications.filter((n) => !n.isRead).length;
+
+  // Fetch notifications from API
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await notificarionService.getNotifications({
+        limit: 20,
+        page: 1,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+      });
+
+      if (response.status) {
+        const localNotifications = response.data.notifications.map(
+          convertToLocalNotification
+        );
+        setNotifications(localNotifications);
+        setUnreadCount(response.data.unreadCount);
+      } else {
+        setError(response.message || 'Failed to fetch notifications');
+      }
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+      setError('Failed to fetch notifications');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mark notifications as read
+  const markAsRead = async (notificationIds: string[]) => {
+    try {
+      await notificarionService.markAsRead({ notificationIds });
+      // Refresh notifications after marking as read
+      fetchNotifications();
+    } catch (err) {
+      console.error('Error marking notifications as read:', err);
+    }
+  };
+
+  // Delete notifications
+  const deleteNotifications = async (notificationIds: string[]) => {
+    try {
+      await notificarionService.deleteNotifications({ notificationIds });
+      // Refresh notifications after deletion
+      fetchNotifications();
+    } catch (err) {
+      console.error('Error deleting notifications:', err);
+    }
+  };
+
+  // Mark all as read
+  const markAllAsRead = async () => {
+    const unreadIds = notifications.filter((n) => !n.isRead).map((n) => n.id);
+    if (unreadIds.length > 0) {
+      await markAsRead(unreadIds);
+    }
+  };
+
+  // Clear all notifications
+  const clearAll = async () => {
+    try {
+      // Call deleteNotifications with no payload to clear all
+      await notificarionService.deleteNotifications({});
+      // Refresh notifications after deletion
+      fetchNotifications();
+    } catch (err) {
+      console.error('Error clearing all notifications:', err);
+    }
+  };
+
+  // Fetch notifications on component mount and when opened
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -228,97 +330,137 @@ export function NotificationList() {
           </CardHeader>
           {isExpanded && (
             <CardContent className="p-0">
-              <ScrollArea className="h-[350px]">
-                <div className="px-2 pb-4 space-y-2">
-                  {dummyNotifications.map((notification, index) => (
-                    <div key={notification.id}>
-                      <div
-                        className={`group flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors ${
-                          !notification.isRead ? 'bg-muted/30' : ''
-                        }`}
-                      >
-                        <div className="flex-shrink-0 mt-1">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={notification.avatar} />
-                            <AvatarFallback className="bg-primary/10">
-                              {getNotificationIcon(
-                                notification.type,
-                                notification.actionType
-                              )}
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4
-                                  className={`text-xs font-medium leading-none ${
-                                    !notification.isRead ? 'font-semibold' : ''
-                                  }`}
-                                >
-                                  {notification.title}
-                                </h4>
-                                {!notification.isRead && (
-                                  <div className="h-2 w-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                                )}
-                              </div>
-                              <p className="text-xs text-muted-foreground line-clamp-2">
-                                {notification.message}
-                              </p>
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge
-                                  variant={getBadgeVariant(notification.type)}
-                                  className="text-xs"
-                                >
-                                  {notification.type}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  {notification.timestamp}
-                                </span>
-                              </div>
+              {loading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              ) : error ? (
+                <div className="flex items-center justify-center h-32 text-red-500">
+                  <p className="text-sm">{error}</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[350px]">
+                  <div className="px-2 pb-4 space-y-2">
+                    {notifications.length === 0 ? (
+                      <div className="flex items-center justify-center h-32 text-muted-foreground">
+                        <p className="text-sm">No notifications</p>
+                      </div>
+                    ) : (
+                      notifications.map((notification, index) => (
+                        <div key={notification.id}>
+                          <div
+                            className={`group flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors ${
+                              !notification.isRead ? 'bg-muted/30' : ''
+                            }`}
+                          >
+                            <div className="flex-shrink-0 mt-1">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={notification.avatar} />
+                                <AvatarFallback className="bg-primary/10">
+                                  {getNotificationIcon(
+                                    notification.type,
+                                    notification.actionType
+                                  )}
+                                </AvatarFallback>
+                              </Avatar>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Mark as read"
-                                disabled={notification.isRead}
-                              >
-                                <Check
-                                  className={`h-3 w-3 ${
-                                    notification.isRead ? 'text-green-500' : ''
-                                  }`}
-                                />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Dismiss notification"
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4
+                                      className={`text-xs font-medium leading-none ${
+                                        !notification.isRead
+                                          ? 'font-semibold'
+                                          : ''
+                                      }`}
+                                    >
+                                      {notification.title}
+                                    </h4>
+                                    {!notification.isRead && (
+                                      <div className="h-2 w-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">
+                                    {notification.message}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge
+                                      variant={getBadgeVariant(
+                                        notification.type
+                                      )}
+                                      className="text-xs"
+                                    >
+                                      {notification.type}
+                                    </Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                      {notification.timestamp}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Mark as read"
+                                    disabled={notification.isRead}
+                                    onClick={() =>
+                                      markAsRead([notification.id])
+                                    }
+                                  >
+                                    <Check
+                                      className={`h-3 w-3 ${
+                                        notification.isRead
+                                          ? 'text-green-500'
+                                          : ''
+                                      }`}
+                                    />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Dismiss notification"
+                                    onClick={() =>
+                                      deleteNotifications([notification.id])
+                                    }
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
                           </div>
+                          {index < notifications.length - 1 && (
+                            <Separator className="my-2" />
+                          )}
                         </div>
-                      </div>
-                      {index < dummyNotifications.length - 1 && (
-                        <Separator className="my-2" />
-                      )}
-                    </div>
-                  ))}{' '}
-                </div>
-              </ScrollArea>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              )}
 
               <div className="px-4 py-3 border-t">
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={markAllAsRead}
+                    disabled={loading || unreadCount === 0}
+                  >
                     Mark All Read
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={clearAll}
+                    disabled={loading || notifications.length === 0}
+                  >
                     Clear All
                   </Button>
                 </div>
