@@ -13,6 +13,7 @@ interface OrderSummaryProps {
   pricePerMessage?: number;
   onCheckout?: () => void;
   isLoading?: boolean;
+  isDisabled?: boolean;
 }
 
 export function OrderSummary({
@@ -24,6 +25,7 @@ export function OrderSummary({
   pricePerMessage = 0,
   onCheckout,
   isLoading = false,
+  isDisabled = false,
 }: OrderSummaryProps) {
   const total = basePrice - discount;
   const formattedTotal = total.toLocaleString('id-ID');
@@ -123,11 +125,13 @@ export function OrderSummary({
         {/* Checkout Button */}
         <Button
           onClick={onCheckout}
-          disabled={isLoading || !isPlanSelected}
+          disabled={isLoading || !isPlanSelected || isDisabled}
           className="w-full text-sm h-9 font-medium rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white flex items-center justify-center gap-2 mt-4"
         >
           {isLoading ? (
             'Processing...'
+          ) : isDisabled ? (
+            'Payment in Progress...'
           ) : isPlanSelected ? (
             <>
               Proceed to Checkout{' '}

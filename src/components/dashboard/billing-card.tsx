@@ -42,6 +42,8 @@ interface PlanPricing {
 }
 interface Order {
   onCheckout: (quota: number) => void;
+  isCheckoutLoading?: boolean;
+  isCheckoutDisabled?: boolean;
 }
 
 const pricingPlans: PricingPlan[] = [
@@ -102,7 +104,11 @@ const pricingPlans: PricingPlan[] = [
   },
 ];
 
-export function BillingCards({ onCheckout }: Order) {
+export function BillingCards({
+  onCheckout,
+  isCheckoutLoading = false,
+  isCheckoutDisabled = false,
+}: Order) {
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [selectedPlanPricing, setSelectedPlanPricing] =
     useState<PlanPricing | null>(null);
@@ -348,7 +354,8 @@ export function BillingCards({ onCheckout }: Order) {
                 discountPercentage={getCurrentPricing()?.discountPercent || 0}
                 pricePerMessage={getCurrentPricing()?.pricePerQuota || 0}
                 onCheckout={handleCheckout}
-                isLoading={loading}
+                isLoading={loading || isCheckoutLoading}
+                isDisabled={isCheckoutDisabled}
               />
             </div>
           </div>
