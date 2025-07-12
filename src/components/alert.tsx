@@ -59,13 +59,13 @@ const alertIconVariants = cva('size-5 shrink-0 mt-1', {
   },
 });
 
-const alertDialogIconVariants = cva('size-16 mx-auto mb-6 drop-shadow-sm', {
+const alertDialogIconVariants = cva('h-6 w-6', {
   variants: {
     variant: {
-      default: 'text-muted-foreground',
+      default: 'text-gray-500 dark:text-gray-400',
       success: 'text-green-500 dark:text-green-400',
       error: 'text-red-500 dark:text-red-400',
-      warning: 'text-amber-500 dark:text-amber-400',
+      warning: 'text-yellow-500 dark:text-yellow-400',
       info: 'text-blue-500 dark:text-blue-400',
     },
   },
@@ -95,6 +95,7 @@ interface AlertDialogProps {
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void;
   showCancel?: boolean;
+  showConfirm?: boolean;
   confirmVariant?:
     | 'default'
     | 'destructive'
@@ -187,6 +188,7 @@ const ReusableAlertDialog: React.FC<AlertDialogProps> = ({
   onConfirm,
   onCancel,
   showCancel = false,
+  showConfirm = false,
   confirmVariant = 'default',
 }) => {
   const Icon = getIcon(variant);
@@ -222,69 +224,66 @@ const ReusableAlertDialog: React.FC<AlertDialogProps> = ({
   const getIconBg = () => {
     switch (variant) {
       case 'success':
-        return 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/30';
+        return 'bg-green-100 dark:bg-green-900/30';
       case 'error':
-        return 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/30';
+        return 'bg-red-100 dark:bg-red-900/30';
       case 'warning':
-        return 'bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/30';
+        return 'bg-yellow-100 dark:bg-yellow-900/30';
       case 'info':
-        return 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/30';
+        return 'bg-blue-100 dark:bg-blue-900/30';
       default:
-        return 'bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/30 dark:to-gray-800/30';
+        return 'bg-gray-100 dark:bg-gray-900/30';
     }
   };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md overflow-hidden border-0 bg-background/95 backdrop-blur-xl shadow-2xl">
-        <AlertDialogHeader className="text-center space-y-6 pt-6">
-          <div
-            className={cn(
-              'w-24 h-24 mx-auto rounded-full flex items-center justify-center ring-1 ring-black/5 dark:ring-white/10',
-              getIconBg()
-            )}
-          >
+      <AlertDialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-900">
+        <div className="flex flex-col items-center space-y-6 py-8">
+          <div className={cn('rounded-full p-3', getIconBg())}>
             <Icon className={cn(alertDialogIconVariants({ variant }))} />
           </div>
-          <div className="space-y-3">
-            <AlertDialogTitle className="text-2xl font-bold tracking-tight leading-tight">
+          <div className="space-y-3 text-center">
+            <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {title}
             </AlertDialogTitle>
             {description && (
-              <AlertDialogDescription className="text-base leading-relaxed text-muted-foreground/80 max-w-sm mx-auto">
+              <AlertDialogDescription className="text-sm text-gray-600 dark:text-gray-400 max-w-sm">
                 {description}
               </AlertDialogDescription>
             )}
           </div>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-row gap-3 pt-8 pb-6">
-          {showCancel && (
-            <AlertDialogCancel
-              onClick={handleCancel}
-              className="w-full sm:w-auto px-6 py-2.5 font-medium transition-all hover:bg-muted/80"
-            >
-              {cancelText}
-            </AlertDialogCancel>
-          )}
-          <AlertDialogAction
-            onClick={handleConfirm}
-            className={cn(
-              'w-full sm:w-auto px-6 py-2.5 font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]',
-              variant === 'error' &&
-                'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0',
-              variant === 'warning' &&
-                'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border-0',
-              variant === 'success' &&
-                'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0',
-              variant === 'info' &&
-                'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0',
-              variant === 'default' &&
-                'bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground border-0'
+          <div className="flex flex-col sm:flex-row gap-3 w-full pt-2">
+            {showCancel && (
+              <AlertDialogCancel
+                onClick={handleCancel}
+                className="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300"
+              >
+                {cancelText}
+              </AlertDialogCancel>
             )}
-          >
-            {confirmText}
-          </AlertDialogAction>
-        </AlertDialogFooter>
+            {showConfirm && (
+              <AlertDialogAction
+                onClick={handleConfirm}
+                className={cn(
+                  'w-full sm:w-auto text-white',
+                  variant === 'error' &&
+                    'bg-red-500 hover:bg-red-600 border-red-500',
+                  variant === 'warning' &&
+                    'bg-yellow-500 hover:bg-yellow-600 border-yellow-500',
+                  variant === 'success' &&
+                    'bg-green-500 hover:bg-green-600 border-green-500',
+                  variant === 'info' &&
+                    'bg-blue-500 hover:bg-blue-600 border-blue-500',
+                  variant === 'default' &&
+                    'bg-gray-500 hover:bg-gray-600 border-gray-500'
+                )}
+              >
+                {confirmText}
+              </AlertDialogAction>
+            )}
+          </div>
+        </div>
       </AlertDialogContent>
     </AlertDialog>
   );
