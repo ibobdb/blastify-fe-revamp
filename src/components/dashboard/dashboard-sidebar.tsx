@@ -148,10 +148,25 @@ export function DashboardSidebar({
           label: 'History',
           href: '/dashboard/history',
         },
+      ],
+    },
+    {
+      title: 'Management',
+      items: [
         {
           icon: <WalletCards size={20} />,
-          label: 'Billing',
+          label: 'Billing / Quota',
           href: '/dashboard/billing',
+        },
+        {
+          icon: <WalletCards size={20} />,
+          label: 'Billing History',
+          href: '/dashboard/billing-history',
+        },
+        {
+          icon: <Home size={20} />,
+          label: 'API Access',
+          href: '/api-management',
         },
       ],
     },
