@@ -40,6 +40,9 @@ interface PlanPricing {
   formattedDiscountAmount: string;
   formattedFinalPrice: string;
 }
+interface Order {
+  onCheckout: (quota: number) => void;
+}
 
 const pricingPlans: PricingPlan[] = [
   {
@@ -99,7 +102,7 @@ const pricingPlans: PricingPlan[] = [
   },
 ];
 
-export function BillingCards() {
+export function BillingCards({ onCheckout }: Order) {
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [selectedPlanPricing, setSelectedPlanPricing] =
     useState<PlanPricing | null>(null);
@@ -196,9 +199,12 @@ export function BillingCards() {
   };
 
   const handleCheckout = () => {
-    // Handle checkout logic
-    console.log('Proceed to checkout with plan:', selectedPlan);
-    console.log('Plan pricing:', selectedPlanPricing || customPlanPricing);
+    const quotaAmount =
+      selectedPlanPricing?.quotaAmount || customPlanPricing?.quotaAmount;
+
+    if (quotaAmount) {
+      onCheckout(quotaAmount);
+    }
   };
 
   const getDisplayPrice = (plan: PricingPlan): string => {

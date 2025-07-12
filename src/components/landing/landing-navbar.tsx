@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ThemeToggle } from '@/components/theme-toggle';
 export function LandingNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -63,17 +64,19 @@ export function LandingNavbar() {
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-200 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-transparent'
+        isScrolled
+          ? 'bg-background/95 backdrop-blur-md shadow-sm border-b border-border'
+          : 'bg-transparent'
       }`}
     >
       <div className="container mx-auto px-4 md:px-6 h-18 flex items-center justify-between">
         {/* Logo with icon */}
         <div className="flex-1 flex items-center justify-start">
           <Link href="/" className="flex items-center gap-2 py-4">
-            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-[#2979FF] text-white">
+            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary text-primary-foreground">
               <MessageSquare className="w-5 h-5" />
             </div>
-            <span className="font-bold text-xl md:text-2xl text-[#222831]">
+            <span className="font-bold text-xl md:text-2xl text-foreground">
               Blastify
             </span>
           </Link>
@@ -98,13 +101,13 @@ export function LandingNavbar() {
                       item.href === '#features' &&
                       typeof window !== 'undefined' &&
                       !window.location.hash)
-                      ? 'text-[#2979FF] font-medium'
-                      : 'text-[#222831] hover:text-[#2979FF]'
+                      ? 'text-primary font-medium'
+                      : 'text-foreground hover:text-primary'
                   }`}
                 >
                   {item.label}
                   <span
-                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-[#2979FF] transform origin-left transition-transform duration-300 ${
+                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary transform origin-left transition-transform duration-300 ${
                       pathname === item.href
                         ? 'scale-x-100'
                         : 'scale-x-0 group-hover:scale-x-100'
@@ -120,7 +123,7 @@ export function LandingNavbar() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-md px-4 py-2.5 text-[15px] text-[#222831] hover:text-[#2979FF] flex items-center gap-1"
+                  className="rounded-md px-4 py-2.5 text-[15px] text-foreground hover:text-primary flex items-center gap-1"
                 >
                   Resources
                   <ChevronDown className="h-4 w-4 opacity-70" />
@@ -128,7 +131,7 @@ export function LandingNavbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="center"
-                className="w-48 bg-white border border-[#E5E7EB] shadow-md rounded-md p-1"
+                className="w-48 bg-popover border border-border shadow-md rounded-md p-1"
               >
                 {resourceItems.map((item) => (
                   <DropdownMenuItem
@@ -138,7 +141,7 @@ export function LandingNavbar() {
                   >
                     <Link
                       href={item.href}
-                      className="flex items-center justify-between w-full px-3 py-2 text-sm text-[#222831] hover:text-[#2979FF] hover:bg-[#F5F8FA]"
+                      className="flex items-center justify-between w-full px-3 py-2 text-sm text-popover-foreground hover:text-primary hover:bg-accent"
                     >
                       {item.label}
                       <ChevronRight className="h-3.5 w-3.5 opacity-70" />
@@ -153,10 +156,11 @@ export function LandingNavbar() {
         {/* Auth Buttons - aligned right with enhanced styling */}
         <div className="flex-1 flex items-center justify-end">
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <Button
               variant="outline"
               size="sm"
-              className="border-[#E5E7EB] text-[#222831] hover:text-[#2979FF] hover:border-[#2979FF] hover:bg-transparent rounded-md px-5 py-2.5 text-[15px] flex items-center gap-2 transition-colors duration-200"
+              className="border-border text-foreground hover:text-primary hover:border-primary hover:bg-transparent rounded-md px-5 py-2.5 text-[15px] flex items-center gap-2 transition-colors duration-200"
               asChild
             >
               <Link href="/signin">
@@ -166,7 +170,7 @@ export function LandingNavbar() {
             </Button>
             <Button
               size="sm"
-              className="bg-[#2979FF] text-white hover:bg-[#1565C0] rounded-md px-5 py-2.5 text-[15px] flex items-center gap-2 shadow-sm hover:shadow transition-all duration-200"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-5 py-2.5 text-[15px] flex items-center gap-2 shadow-sm hover:shadow transition-all duration-200"
               asChild
             >
               <Link href="/signup">
@@ -183,23 +187,23 @@ export function LandingNavbar() {
                 <Button
                   size="icon"
                   variant="outline"
-                  className="border-[#E5E7EB] hover:border-[#2979FF] hover:bg-[#F5F8FA] ml-2"
+                  className="border-border hover:border-primary hover:bg-accent ml-2"
                 >
-                  <Menu className="h-5 w-5 text-[#222831]" />
+                  <Menu className="h-5 w-5 text-foreground" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
               <SheetContent
                 side="right"
-                className="bg-white w-[300px] sm:w-[350px] p-0"
+                className="bg-background w-[300px] sm:w-[350px] p-0"
               >
                 <div className="flex flex-col h-full">
-                  <div className="flex items-center justify-between p-4 border-b border-[#E5E7EB]">
+                  <div className="flex items-center justify-between p-4 border-b border-border">
                     <Link href="/" className="flex items-center gap-2">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-md bg-[#2979FF] text-white">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary text-primary-foreground">
                         <MessageSquare className="w-5 h-5" />
                       </div>
-                      <span className="font-bold text-xl text-[#222831]">
+                      <span className="font-bold text-xl text-foreground">
                         Blastify
                       </span>
                     </Link>
@@ -207,9 +211,9 @@ export function LandingNavbar() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="hover:bg-[#F5F8FA] rounded-full h-9 w-9"
+                        className="hover:bg-accent rounded-full h-9 w-9"
                       >
-                        <X className="h-5 w-5 text-[#222831]" />
+                        <X className="h-5 w-5 text-foreground" />
                         <span className="sr-only">Close menu</span>
                       </Button>
                     </SheetTrigger>
@@ -223,18 +227,18 @@ export function LandingNavbar() {
                           href={item.href}
                           className={`px-2 py-1 text-base font-medium relative group ${
                             pathname === item.href
-                              ? 'text-[#2979FF]'
-                              : 'text-[#222831]'
+                              ? 'text-primary'
+                              : 'text-foreground'
                           }`}
                         >
                           <div className="flex items-center">
                             <span>{item.label}</span>
                             {pathname === item.href && (
-                              <span className="ml-2 w-1.5 h-1.5 rounded-full bg-[#2979FF]"></span>
+                              <span className="ml-2 w-1.5 h-1.5 rounded-full bg-primary"></span>
                             )}
                           </div>
                           <span
-                            className={`absolute bottom-0 left-2 right-2 h-0.5 bg-[#2979FF]/20 transform origin-left transition-transform duration-200 ${
+                            className={`absolute bottom-0 left-2 right-2 h-0.5 bg-primary/20 transform origin-left transition-transform duration-200 ${
                               pathname === item.href
                                 ? 'scale-x-100'
                                 : 'scale-x-0'
@@ -244,15 +248,15 @@ export function LandingNavbar() {
                       ))}
 
                       {/* Resources section in mobile */}
-                      <div className="pt-2 border-t border-[#E5E7EB]">
-                        <p className="text-sm text-[#222831]/70 mb-3 font-medium px-2">
+                      <div className="pt-2 border-t border-border">
+                        <p className="text-sm text-muted-foreground mb-3 font-medium px-2">
                           Resources
                         </p>
                         {resourceItems.map((item) => (
                           <Link
                             key={item.href}
                             href={item.href}
-                            className="px-2 py-1 block text-base text-[#222831] hover:text-[#2979FF]"
+                            className="px-2 py-1 block text-base text-foreground hover:text-primary"
                           >
                             {item.label}
                           </Link>
@@ -261,10 +265,10 @@ export function LandingNavbar() {
                     </nav>
                   </div>
 
-                  <div className="mt-auto p-6 pt-4 border-t border-[#E5E7EB] space-y-3">
+                  <div className="mt-auto p-6 pt-4 border-t border-border space-y-3">
                     <Button
                       variant="outline"
-                      className="w-full justify-center border-[#E5E7EB] text-[#222831] hover:bg-[#F5F8FA] hover:text-[#2979FF] hover:border-[#2979FF] flex items-center gap-2 h-11"
+                      className="w-full justify-center border-border text-foreground hover:bg-accent hover:text-primary hover:border-primary flex items-center gap-2 h-11"
                       asChild
                     >
                       <Link href="/signin">
@@ -273,7 +277,7 @@ export function LandingNavbar() {
                       </Link>
                     </Button>
                     <Button
-                      className="w-full justify-center bg-[#2979FF] text-white hover:bg-[#1565C0] flex items-center gap-2 h-11 shadow-sm"
+                      className="w-full justify-center bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 h-11 shadow-sm"
                       asChild
                     >
                       <Link href="/signup">
@@ -282,11 +286,11 @@ export function LandingNavbar() {
                       </Link>
                     </Button>
 
-                    <div className="text-center text-[#222831]/60 text-sm pt-2">
+                    <div className="text-center text-muted-foreground text-sm pt-2">
                       New to Blastify?{' '}
                       <Link
                         href="/signup"
-                        className="text-[#2979FF] hover:underline"
+                        className="text-primary hover:underline"
                       >
                         Create an account
                       </Link>

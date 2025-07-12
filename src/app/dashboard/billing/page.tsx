@@ -1,5 +1,92 @@
+'use client';
+
 import { BillingCards } from '@/components/dashboard/billing-card';
+import { billingService } from '@/services/billing.service';
+import { midtransService } from '@/services/midtrans.service';
+import { useEffect, useState } from 'react';
+import { useGlobalAlert } from '@/context';
+
 export default function BillingPage() {
+  const [isPaymentReady, setIsPaymentReady] = useState(false);
+  const { showSuccess, showError } = useGlobalAlert();
+  const handleCheckout = async (quota: number) => {
+    try {
+      console.log('Proceeding to checkout with quota:', quota);
+
+      // Create transaction using billing service
+      const transactionResponse = await billingService.createTransaction({
+        quotaAmount: quota,
+      });
+      if (
+        transactionResponse.status &&
+        transactionResponse.data?.transaction.snapToken
+      ) {
+        // Initialize Midtrans after successful transaction creation
+        if (!isPaymentReady) {
+          try {
+            await midtransService.loadSnapScript();
+            setIsPaymentReady(true);
+          } catch (error) {
+            console.error('Failed to initialize payment system:', error);
+            alert('Failed to initialize payment system. Please try again.');
+            return;
+          }
+        }
+        // Open Midtrans Snap popup
+        await midtransService.pay(
+          transactionResponse.data.transaction.snapToken,
+          {
+            onSuccess: (result: any) => {
+              showSuccess('Payment Successful');
+              // You can add additional success handling here:
+              // - Refresh user quota
+              // - Navigate to success page
+              // - Update UI state
+            },
+            onPending: (result: any) => {
+              console.log('Payment pending:', result);
+              alert(
+                'Payment is being processed. Please complete your payment.'
+              );
+            },
+            onError: (result: any) => {
+              console.log('Payment error:', result);
+              alert('Payment failed. Please try again or contact support.');
+            },
+            onClose: () => {
+              console.log('Payment popup closed by user');
+              // Optional: Track user abandonment for analytics
+            },
+          }
+        );
+      } else {
+        console.error('Invalid transaction response structure:', {
+          status: transactionResponse.status,
+          hasData: 'data' in transactionResponse,
+          data: transactionResponse.data,
+          hasSnapToken: transactionResponse.data?.transaction.snapToken,
+        });
+
+        if (!transactionResponse.status) {
+          throw new Error(
+            `Transaction failed: ${
+              transactionResponse.message || 'Unknown error'
+            }`
+          );
+        } else if (!transactionResponse.data?.transaction.snapToken) {
+          throw new Error(
+            'Failed to get payment token from transaction response'
+          );
+        } else {
+          throw new Error('Invalid transaction response structure');
+        }
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      alert('Failed to process checkout. Please try again.');
+    }
+  };
+
   return (
     <div className="container mx-auto pt-8 px-4 md:px-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
@@ -14,7 +101,21 @@ export default function BillingPage() {
 
       {/* Billing Pricing Section */}
       <div className="">
-        <BillingCards />
+        <div className="flex gap-2 mb-4">
+          <button
+            className="px-4 py-2 bg-green-500 text-white rounded"
+            onClick={() => showSuccess('This is a success alert!')}
+          >
+            Show Success Alert
+          </button>
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded"
+            onClick={() => showError('This is an error alert!')}
+          >
+            Show Error Alert
+          </button>
+        </div>
+        <BillingCards onCheckout={handleCheckout} />
       </div>
     </div>
   );

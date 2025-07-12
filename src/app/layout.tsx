@@ -9,6 +9,7 @@ import { LoadingProvider } from '@/context/loading.context';
 import { ConfirmProvider } from '@/context/confirm.context';
 import { LoadingContainer } from '@/components/loading-container';
 import { Toaster } from '@/components/ui/sonner';
+import { AlertProvider } from '@/context/alert.context';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -43,10 +44,12 @@ export default function RootLayout({
         >
           <AuthProvider>
             <LoadingProvider>
-              <ConfirmProvider>
-                <LoadingContainer>{children}</LoadingContainer>
-                <Toaster />
-              </ConfirmProvider>
+              <AlertProvider>
+                <ConfirmProvider>
+                  <LoadingContainer>{children}</LoadingContainer>
+                  <Toaster />
+                </ConfirmProvider>
+              </AlertProvider>
             </LoadingProvider>
           </AuthProvider>
         </ThemeProvider>
