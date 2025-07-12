@@ -101,20 +101,6 @@ export default function BillingPage() {
 
       {/* Billing Pricing Section */}
       <div className="">
-        <div className="flex gap-2 mb-4">
-          <button
-            className="px-4 py-2 bg-green-500 text-white rounded"
-            onClick={() => showSuccess('This is a success alert!')}
-          >
-            Show Success Alert
-          </button>
-          <button
-            className="px-4 py-2 bg-red-500 text-white rounded"
-            onClick={() => showError('This is an error alert!')}
-          >
-            Show Error Alert
-          </button>
-        </div>
         <BillingCards onCheckout={handleCheckout} />
       </div>
     </div>

@@ -193,6 +193,17 @@ const ReusableAlertDialog: React.FC<AlertDialogProps> = ({
 }) => {
   const Icon = getIcon(variant);
 
+  // Auto-close timer when no buttons are shown
+  React.useEffect(() => {
+    if (open && !showConfirm && !showCancel) {
+      const timer = setTimeout(() => {
+        onOpenChange(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [open, showConfirm, showCancel, onOpenChange]);
+
   const handleConfirm = async () => {
     if (onConfirm) {
       await onConfirm();
