@@ -166,7 +166,7 @@ export function DashboardSidebar({
         {
           icon: <Home size={20} />,
           label: 'API Access',
-          href: '/api-management',
+          href: '/dashboard/api-management',
         },
       ],
     },
