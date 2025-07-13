@@ -53,8 +53,12 @@ COPY --from=dev-deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application (includes our manifest fix script)
 RUN npm run build
+
+# Verify the manifest files were created
+RUN ls -la .next/server/app/\(landing\)/ || echo "Listing landing directory"
+RUN ls -la .next/standalone/.next/server/app/\(landing\)/ || echo "Listing standalone landing directory"
 
 # Production image, copy all the files and run next
 FROM base AS runner
@@ -99,9 +103,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 # Expose port
-EXPOSE 3000
+EXPOSE 5000
 
-ENV PORT=3000
+ENV PORT=5000
 ENV HOSTNAME="0.0.0.0"
 
 # Use server.js from standalone output

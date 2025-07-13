@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
   // External packages for server components
   serverExternalPackages: [],
 
+  // Experimental features to fix client reference manifest issues
+  experimental: {
+    // Ensure proper client component bundling
+    optimizePackageImports: [],
+  },
+
   // Setting this to false can help bypass TypeScript errors in development
   typescript: {
     // This ignores TypeScript errors during builds
