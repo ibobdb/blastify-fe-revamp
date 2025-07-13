@@ -2,8 +2,11 @@
  * Logger utility for Blastify
  *
  * This utility provides structured logging with different severity levels,
- * timestamps, and optional file output for production environments.
+ * timestamps, and optional file output for development environments.
  * Browser-safe implementation that gracefully handles client-side usage.
+ *
+ * PRODUCTION BEHAVIOR: All logging is completely disabled in production
+ * for performance and security reasons. Logger calls become no-ops.
  */
 
 // Define log levels in order of severity
@@ -28,12 +31,12 @@ export interface LoggerConfig {
 // Check if we're in a browser environment
 const isBrowser = typeof window !== 'undefined';
 
-// Default configuration
+// Default configuration - disable logging completely in production
 const DEFAULT_CONFIG: LoggerConfig = {
   minLevel:
-    process.env.NODE_ENV === 'production' ? LogLevel.INFO : LogLevel.DEBUG,
-  enableConsole: true,
-  enableFileOutput: !isBrowser && process.env.NODE_ENV === 'production',
+    process.env.NODE_ENV === 'production' ? LogLevel.FATAL + 1 : LogLevel.DEBUG, // Set above FATAL to disable all logging in production
+  enableConsole: process.env.NODE_ENV !== 'production',
+  enableFileOutput: false, // Disable file output in production
   filePath: './logs/blastify.log',
   useColors: !isBrowser && process.env.NODE_ENV !== 'production',
   includeTimestamps: true,
@@ -94,6 +97,9 @@ class Logger {
 
   constructor(config: Partial<LoggerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
+
+    // Skip initialization in production
+    if (process.env.NODE_ENV === 'production') return;
 
     // Only initialize file stream in Node.js environment
     if (!isBrowser && this.config.enableFileOutput) {
@@ -191,6 +197,9 @@ class Logger {
     // Skip if below the configured minimum level
     if (level < this.config.minLevel) return;
 
+    // Early return in production to avoid any processing overhead
+    if (process.env.NODE_ENV === 'production') return;
+
     const formattedMessage = this.formatMessage(level, message, context);
 
     // Output to console if enabled
@@ -223,18 +232,23 @@ class Logger {
   }
 
   debug(message: string, context?: any): void {
+    if (process.env.NODE_ENV === 'production') return;
     this.log(LogLevel.DEBUG, message, context);
   }
 
   info(message: string, context?: any): void {
+    if (process.env.NODE_ENV === 'production') return;
     this.log(LogLevel.INFO, message, context);
   }
 
   warn(message: string, context?: any): void {
+    if (process.env.NODE_ENV === 'production') return;
     this.log(LogLevel.WARN, message, context);
   }
 
   error(message: string, error?: Error | any): void {
+    if (process.env.NODE_ENV === 'production') return;
+
     let context = error;
 
     if (error instanceof Error) {
@@ -250,6 +264,8 @@ class Logger {
   }
 
   fatal(message: string, error?: Error | any): void {
+    if (process.env.NODE_ENV === 'production') return;
+
     let context = error;
 
     if (error instanceof Error) {
