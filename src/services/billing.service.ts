@@ -51,7 +51,31 @@ interface TransactionResponse {
     };
   };
 }
-
+interface HistoryTransactionResponse {
+  status: boolean;
+  message: string;
+  data: Array<{
+    id: string;
+    quotaId: string;
+    orderId: string;
+    amount: number;
+    quotaAmount: number;
+    status: string;
+    paymentType: string | null;
+    midtransId: string | null;
+    paymentDetails: {
+      bank: string;
+      vaNumber: string;
+    };
+    paymentTime: string | null;
+    paidAt: string | null;
+    expiredAt: string;
+    snapToken: string;
+    snapRedirectUrl: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+}
 interface CalculatePriceRequest {
   quotaAmount: number;
 }
@@ -74,9 +98,9 @@ interface CalculatePriceResponse {
 export const billingService = {
   async getTransactions(
     params: TransactionRequest
-  ): Promise<TransactionResponse> {
+  ): Promise<HistoryTransactionResponse> {
     try {
-      const response = await api.get('/billing/transactions', { params });
+      const response = await api.get('/transaction', { params });
       if (!response.data.status) {
         throw new Error(
           response.data.message || 'Failed to fetch transactions'
