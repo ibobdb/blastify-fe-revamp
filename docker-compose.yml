@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  blastify-fe:
-    image: ibobdb/blastify-revamp:v0.1.0
-    container_name: blastify-revamp
+  blastify-fe-revamp:
+    image: ibobdb/blastify-fe-revamp:v0.1.0
+    container_name: blastify-fe-revamp
     restart: unless-stopped
     volumes:
       - /var/log/blastify-fe:/app/logs
     ports:
-      - '5000:5000'
+      - '5005:5000'
     environment:
       TZ: Asia/Jakarta
     logging:
