@@ -32,7 +32,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/blastify-fe:${{ env.LATEST_TAG }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/blastify-fe-revamp:${{ env.LATEST_TAG }}
           build-args: |
             GIT_TAG=${{ env.LATEST_TAG }}
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
