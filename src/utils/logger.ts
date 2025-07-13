@@ -3,6 +3,7 @@
  *
  * This utility provides structured logging with different severity levels,
  * timestamps, and optional file output for production environments.
+ * Browser-safe implementation that gracefully handles client-side usage.
  */
 
 // Define log levels in order of severity
@@ -24,14 +25,17 @@ export interface LoggerConfig {
   includeTimestamps?: boolean;
 }
 
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
 // Default configuration
 const DEFAULT_CONFIG: LoggerConfig = {
   minLevel:
     process.env.NODE_ENV === 'production' ? LogLevel.INFO : LogLevel.DEBUG,
   enableConsole: true,
-  enableFileOutput: process.env.NODE_ENV === 'production',
+  enableFileOutput: !isBrowser && process.env.NODE_ENV === 'production',
   filePath: './logs/blastify.log',
-  useColors: process.env.NODE_ENV !== 'production',
+  useColors: !isBrowser && process.env.NODE_ENV !== 'production',
   includeTimestamps: true,
 };
 
@@ -91,20 +95,22 @@ class Logger {
   constructor(config: Partial<LoggerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
 
-    // Don't initialize file stream in browser environment
-    if (typeof window === 'undefined' && this.config.enableFileOutput) {
-      this.initFileStream();
+    // Only initialize file stream in Node.js environment
+    if (!isBrowser && this.config.enableFileOutput) {
+      this.initFileStream().catch((error) => {
+        console.error('Failed to initialize file stream:', error);
+        this.config.enableFileOutput = false;
+      });
     }
   }
 
-  private initFileStream(): void {
+  private async initFileStream(): Promise<void> {
     // Only attempt in a Node.js environment
-    if (typeof window === 'undefined' && !this.isFileStreamInitialized) {
+    if (!isBrowser && !this.isFileStreamInitialized) {
       try {
-        // We use dynamic import here to avoid issues with browser environments
-        // This will be properly initialized only in a Node.js environment
-        const fs = require('fs');
-        const path = require('path');
+        // Use dynamic import to avoid bundling these modules for the client
+        const fs = await import('fs');
+        const path = await import('path');
 
         // Ensure log directory exists
         if (this.config.filePath) {
@@ -122,12 +128,12 @@ class Logger {
     }
   }
 
-  private writeToFile(message: string): void {
-    if (!this.config.enableFileOutput || typeof window !== 'undefined') return;
+  private async writeToFile(message: string): Promise<void> {
+    if (!this.config.enableFileOutput || isBrowser) return;
 
     try {
-      // Use Node.js fs module for file operations
-      const fs = require('fs');
+      // Use dynamic import to avoid bundling fs for the client
+      const fs = await import('fs');
       fs.appendFileSync(this.config.filePath!, message + '\n');
     } catch (error) {
       console.error('Failed to write to log file:', error);
@@ -208,9 +214,11 @@ class Logger {
       }
     }
 
-    // Write to file if enabled
+    // Write to file if enabled (async, non-blocking)
     if (this.config.enableFileOutput) {
-      this.writeToFile(formattedMessage);
+      this.writeToFile(formattedMessage).catch((error) => {
+        console.error('Failed to write log to file:', error);
+      });
     }
   }
 
