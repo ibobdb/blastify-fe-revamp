@@ -32,6 +32,7 @@ interface AuthContextType {
   requestPasswordReset: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
+  validatePassword: (password: string) => Promise<void>;
 }
 
 // Create context with default value
@@ -47,6 +48,7 @@ const AuthContext = createContext<AuthContextType>({
   requestPasswordReset: async () => {},
   resetPassword: async () => {},
   verifyEmail: async () => {},
+  validatePassword: async () => {},
 });
 
 // Mock user data
@@ -181,6 +183,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const validatePassword = async (password: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await authService.validatePassword(password);
+      if (!result.success) {
+        throw new Error(result.message || 'Invalid password');
+      }
+      setLoading(false);
+    } catch (err: any) {
+      setError(err.message || 'Password validation failed.');
+      setLoading(false);
+      throw err;
+    }
+  };
+
   // Check for authentication on mount using token from cookies
   useEffect(() => {
     const checkAuth = async () => {
@@ -238,6 +257,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     requestPasswordReset,
     resetPassword,
     verifyEmail,
+    validatePassword,
   };
 
   return (

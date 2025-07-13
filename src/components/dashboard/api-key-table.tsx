@@ -26,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { PasswordValidationDialog } from '@/components/dashboard/password-validation-dialog';
 
 interface ApiKey {
   id: string;
@@ -67,16 +68,65 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
   const [deletingApiKey, setDeletingApiKey] = useState<ApiKey | null>(null);
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
 
+  // Password validation states
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'view' | 'copy-key' | 'copy-id';
+    data: { keyId: string; key?: string; label?: string };
+  } | null>(null);
+
   const toggleKeyVisibility = (keyId: string) => {
-    setVisibleKeys((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(keyId)) {
-        newSet.delete(keyId);
-      } else {
-        newSet.add(keyId);
-      }
-      return newSet;
+    setPendingAction({
+      type: 'view',
+      data: { keyId },
     });
+    setPasswordDialogOpen(true);
+  };
+
+  const handlePasswordValidated = () => {
+    if (!pendingAction) return;
+
+    switch (pendingAction.type) {
+      case 'view':
+        setVisibleKeys((prev) => {
+          const newSet = new Set(prev);
+          if (newSet.has(pendingAction.data.keyId)) {
+            newSet.delete(pendingAction.data.keyId);
+          } else {
+            newSet.add(pendingAction.data.keyId);
+          }
+          return newSet;
+        });
+        break;
+      case 'copy-key':
+      case 'copy-id':
+        if (pendingAction.data.key && pendingAction.data.label) {
+          executeClipboardCopy(
+            pendingAction.data.key,
+            pendingAction.data.label
+          );
+        }
+        break;
+    }
+
+    setPendingAction(null);
+  };
+
+  const executeClipboardCopy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied to clipboard`);
+    } catch (error) {
+      toast.error(`Failed to copy ${label.toLowerCase()}`);
+    }
+  };
+
+  const requestPasswordForCopy = (text: string, label: string) => {
+    setPendingAction({
+      type: label === 'API key' ? 'copy-key' : 'copy-id',
+      data: { keyId: '', key: text, label },
+    });
+    setPasswordDialogOpen(true);
   };
 
   const maskApiKey = (key: string) => {
@@ -85,12 +135,8 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
   };
 
   const copyToClipboard = async (text: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success(`${label} copied to clipboard`);
-    } catch (error) {
-      toast.error(`Failed to copy ${label.toLowerCase()}`);
-    }
+    // This function is kept for backward compatibility but now redirects to password validation
+    requestPasswordForCopy(text, label);
   };
 
   const handleDeleteApiKey = async (apiKey: ApiKey) => {
@@ -373,6 +419,15 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <PasswordValidationDialog
+        open={passwordDialogOpen}
+        onOpenChange={setPasswordDialogOpen}
+        onValidated={handlePasswordValidated}
+        title="Confirm Password"
+        description="Please enter your password to perform this sensitive action."
+        actionLabel="Confirm"
+      />
     </div>
   );
 }

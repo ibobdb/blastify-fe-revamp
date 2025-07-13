@@ -298,6 +298,39 @@ const authService = {
     return { user: { ...mockUser, ...profileData } };
   },
   /**
+   * Validate current user's password
+   * @param password The password to validate
+   * @returns Promise with validation result
+   */
+  validatePassword: async (password: string) => {
+    authLogger.info('Password validation attempt');
+    try {
+      const response = await api.post('/auth/validate-password', {
+        password,
+      });
+      const { status, message } = response.data;
+
+      if (status) {
+        authLogger.info('Password validation successful');
+        return {
+          success: true,
+          message: message || 'Password is valid',
+        };
+      } else {
+        authLogger.warn('Password validation failed', { message });
+        throw new Error(message || 'Invalid password');
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to validate password';
+      authLogger.error('Password validation error', error);
+      throw new Error(errorMessage);
+    }
+  },
+
+  /**
    * Logout function - removes authentication tokens and clears session
    * No API call required since we don't have a logout endpoint
    *
