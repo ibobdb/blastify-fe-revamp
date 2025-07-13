@@ -5,7 +5,13 @@ const nextConfig: NextConfig = {
   /* config options here */
 
   // Enable standalone output for Docker optimization
-  // output: 'standalone',
+  output: 'standalone',
+
+  // Experimental features for App Router stability
+  experimental: {
+    // Ensure proper client component handling
+    serverComponentsExternalPackages: [],
+  },
 
   // Setting this to false can help bypass TypeScript errors in development
   typescript: {
