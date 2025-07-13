@@ -4,6 +4,9 @@ import { getSecurityHeaders } from './src/utils/security-headers';
 const nextConfig: NextConfig = {
   /* config options here */
 
+  // Enable standalone output for Docker optimization
+  output: 'standalone',
+
   // Setting this to false can help bypass TypeScript errors in development
   typescript: {
     // This ignores TypeScript errors during builds

@@ -53,7 +53,7 @@ export function FaqSection() {
   ];
 
   return (
-    <section id="faq" className="py-20 bg-[#F5F8FA]">
+    <section id="faq" className="py-20 bg-muted/30">
       <div className="container px-4 mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -62,10 +62,10 @@ export function FaqSection() {
           transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <h2 className="text-3xl font-bold tracking-tight mb-4 text-[#222831]">
-            Frequently Asked <span className="text-[#2979FF]">Questions</span>
+          <h2 className="text-3xl font-bold tracking-tight mb-4 text-foreground">
+            Frequently Asked <span className="text-primary">Questions</span>
           </h2>
-          <p className="text-xl text-[#222831]/70">
+          <p className="text-xl text-muted-foreground">
             Get answers to the most common questions about our WhatsApp
             marketing platform
           </p>
@@ -83,12 +83,12 @@ export function FaqSection() {
               >
                 <AccordionItem
                   value={`item-${index}`}
-                  className="border-[#E5E7EB]"
+                  className="border-border"
                 >
-                  <AccordionTrigger className="text-left font-medium text-[#222831] hover:text-[#2979FF]">
+                  <AccordionTrigger className="text-left font-medium text-foreground hover:text-primary">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-[#222831]/70">
+                  <AccordionContent className="text-muted-foreground">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>

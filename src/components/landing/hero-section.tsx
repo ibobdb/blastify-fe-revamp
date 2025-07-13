@@ -7,12 +7,12 @@ import { ArrowRight, MessageSquare, Zap } from 'lucide-react';
 
 export function HeroSection() {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-[#FFFFFF] to-[#F5F8FA]">
+    <div className="relative overflow-hidden bg-gradient-to-b from-background to-muted/30">
       {/* Decorative elements */}
       <div className="absolute inset-0 z-0 opacity-30">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-[#2979FF]/20 rounded-full filter blur-3xl" />
-        <div className="absolute top-40 right-20 w-80 h-80 bg-[#1565C0]/20 rounded-full filter blur-3xl" />
-        <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-[#FFD54F]/20 rounded-full filter blur-3xl" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full filter blur-3xl" />
+        <div className="absolute top-40 right-20 w-80 h-80 bg-primary/30 rounded-full filter blur-3xl" />
+        <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-accent/40 rounded-full filter blur-3xl" />
       </div>
 
       <div className="container relative z-10 px-4 py-24 md:py-32 mx-auto flex flex-col lg:flex-row items-center gap-12">
@@ -24,35 +24,35 @@ export function HeroSection() {
         >
           {' '}
           <motion.h1
-            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-[#222831]"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-foreground"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <motion.span
-              className="inline-block text-[#2979FF] mb-2 relative"
+              className="inline-block text-primary mb-2 relative"
               whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               Only Pay
             </motion.span>
             <br />
-            For What You <span className="text-[#2979FF]">Use</span> —{' '}
+            For What You <span className="text-primary">Use</span> —{' '}
             <span className="relative">No Subscriptions</span>
           </motion.h1>
           <motion.p
-            className="text-xl md:text-2xl text-[#222831]/80 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+            className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <span className="text-[#2979FF] font-medium">100 Free Credits</span>{' '}
+            <span className="text-primary font-medium">100 Free Credits</span>{' '}
             on signup. Send powerful WhatsApp campaigns with{' '}
-            <span className="text-[#2979FF] font-medium">
+            <span className="text-primary font-medium">
               full features for everyone
             </span>
             . No subscriptions, no locked features — just{' '}
-            <span className="text-[#2979FF] font-medium">
+            <span className="text-primary font-medium">
               simple, transparent pricing
             </span>
             .
@@ -67,7 +67,7 @@ export function HeroSection() {
               <Button
                 asChild
                 size="lg"
-                className="text-lg px-8 py-6 bg-[#2979FF] hover:bg-[#1565C0] text-white font-medium shadow-lg shadow-[#2979FF]/25 group relative overflow-hidden"
+                className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg shadow-primary/25 group relative overflow-hidden"
               >
                 <Link href="/signup" className="flex items-center gap-2">
                   {' '}
@@ -92,7 +92,7 @@ export function HeroSection() {
 
             <Link
               href="#features"
-              className="text-[#2979FF] hover:text-[#1565C0] text-lg font-medium flex items-center gap-2 transition-colors"
+              className="text-primary hover:text-primary/80 text-lg font-medium flex items-center gap-2 transition-colors"
             >
               See Features
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -107,7 +107,7 @@ export function HeroSection() {
           transition={{ duration: 0.7, delay: 0.3 }}
         >
           <div className="relative w-full max-w-md mx-auto lg:max-w-full">
-            <div className="absolute -top-8 -left-8 w-24 h-24 bg-[#2979FF]/30 rounded-full filter blur-xl" />
+            <div className="absolute -top-8 -left-8 w-24 h-24 bg-primary/30 rounded-full filter blur-xl" />
             <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-[#FFD54F]/30 rounded-full filter blur-xl" />
 
             {/* Message blasting animation illustration */}
@@ -121,11 +121,11 @@ export function HeroSection() {
               {/* Phone device frame with messages */}
               <div className="relative mx-auto" style={{ maxWidth: '320px' }}>
                 {/* Phone frame */}
-                <div className="relative bg-[#222831] rounded-[32px] p-3 shadow-xl border-4 border-[#222831]">
+                <div className="relative bg-card-foreground rounded-[32px] p-3 shadow-xl border-4 border-card-foreground">
                   {/* Phone screen */}
-                  <div className="bg-[#F5F8FA] rounded-[24px] overflow-hidden h-[500px] relative">
+                  <div className="bg-muted rounded-[24px] overflow-hidden h-[500px] relative">
                     {/* WhatsApp-like header */}
-                    <div className="bg-[#2979FF] text-white p-3 flex items-center gap-3">
+                    <div className="bg-primary text-primary-foreground p-3 flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                         <MessageSquare className="w-5 h-5" />
                       </div>
@@ -168,14 +168,14 @@ export function HeroSection() {
                                 {['09:15', '09:16', '09:16', '09:17'][index]}
                               </span>
                               <svg
-                                className="w-3 h-3 text-[#2979FF]"
+                                className="w-3 h-3 text-primary"
                                 fill="currentColor"
                                 viewBox="0 0 24 24"
                               >
                                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                               </svg>
                               <svg
-                                className="w-3 h-3 text-[#2979FF] -ml-2"
+                                className="w-3 h-3 text-primary -ml-2"
                                 fill="currentColor"
                                 viewBox="0 0 24 24"
                               >
@@ -193,11 +193,11 @@ export function HeroSection() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 1.2 }}
                       >
-                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-md border border-[#E5E7EB] text-center">
-                          <div className="text-sm font-medium text-[#2979FF]">
+                        <div className="bg-card/80 backdrop-blur-sm rounded-lg p-3 shadow-md border border-border text-center">
+                          <div className="text-sm font-medium text-primary">
                             Message sent to 1,254 recipients
                           </div>
-                          <div className="text-xs text-[#222831]/70 mt-1">
+                          <div className="text-xs text-muted-foreground mt-1">
                             Delivered rate: 98%
                           </div>
                           <div className="flex justify-center mt-2 -space-x-1">
@@ -215,7 +215,7 @@ export function HeroSection() {
                                 }]`}
                               />
                             ))}
-                            <div className="w-6 h-6 rounded-full border-2 border-white bg-[#2979FF] flex items-center justify-center text-white text-[10px]">
+                            <div className="w-6 h-6 rounded-full border-2 border-white bg-primary flex items-center justify-center text-primary-foreground text-[10px]">
                               <span>+1k</span>
                             </div>
                           </div>

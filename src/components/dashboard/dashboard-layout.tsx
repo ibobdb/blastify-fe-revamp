@@ -5,6 +5,7 @@ import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar';
 import { DashboardNavbar } from '@/components/dashboard/dashboard-navbar';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { QuotaProvider } from '@/context';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -45,23 +46,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
   return (
-    <div className="h-screen flex overflow-hidden bg-background">
-      <DashboardSidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggle={toggleSidebar}
-      />
-      <div className="flex flex-col flex-grow w-full">
-        <DashboardNavbar onMenuClick={toggleSidebar} />
-        <main
-          className={cn(
-            'flex-grow overflow-auto transition-all duration-300 bg-gray-50 dark:bg-gray-900/20'
-          )}
-        >
-          <div className="px-2 py-8 md:px-8 max-w-[1600px] mx-auto">
-            {children}
-          </div>
-        </main>
+    <QuotaProvider>
+      <div className="h-screen flex overflow-hidden bg-background">
+        <DashboardSidebar
+          isCollapsed={isSidebarCollapsed}
+          onToggle={toggleSidebar}
+        />
+        <div className="flex flex-col flex-grow w-full">
+          <DashboardNavbar onMenuClick={toggleSidebar} />
+          <main
+            className={cn(
+              'flex-grow overflow-auto transition-all duration-300 bg-gray-50 dark:bg-gray-900/20'
+            )}
+          >
+            <div className="px-2 py-8 md:px-8 max-w-[1600px] mx-auto">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </QuotaProvider>
   );
 }

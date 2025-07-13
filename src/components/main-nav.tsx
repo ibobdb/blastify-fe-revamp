@@ -54,8 +54,6 @@ export function MainNav() {
         </div>
 
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-
           {isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

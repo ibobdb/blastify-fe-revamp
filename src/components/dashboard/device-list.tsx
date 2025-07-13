@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import {
   Device,
   ApiDevice,
-  mockDevices,
   mapApiStatusToUiStatus,
   formatLastActive,
 } from '@/types/device';
@@ -13,6 +12,7 @@ import { Smartphone, PlusCircle, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { deviceService } from '@/services/device.service';
 import { Card } from '@/components/ui/card';
+import { DataLoading, DataLoadingWrapper } from '@/components/ui/loading';
 
 interface DeviceListProps {
   devices?: Device[]; // Make this optional since we will fetch data
@@ -30,52 +30,43 @@ export default function DeviceList({
   const [devices, setDevices] = useState<Device[]>(initialDevices || []);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [usingMockData, setUsingMockData] = useState<boolean>(false);
-
-  // Fetch device data from API
+  const [usingMockData, setUsingMockData] = useState<boolean>(false); // Fetch device data from API
   const fetchDevices = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await deviceService.getClientStatus();
+      const fetchedDevices = await deviceService.getAllDevices();
 
-      if (response.status) {
-        const apiDevice = response.data;
-
-        // Convert API response to our Device format
-        const deviceFromApi: Device = {
-          id: apiDevice.clientId,
-          name: `Device - ${apiDevice.clientId.substring(0, 8)}`, // Using part of the ID as name
-          status: mapApiStatusToUiStatus(apiDevice.status),
-          type: 'mobile', // Default type since API doesn't specify
-          lastActive: formatLastActive(apiDevice.lastActive),
-          isActive: apiDevice.status === 'CONNECTED',
-          connectedDate: apiDevice.lastActive, // Using lastActive as the connected date
-        };
-
-        const updatedDevices = [deviceFromApi];
-        setDevices(updatedDevices);
+      if (fetchedDevices && fetchedDevices.length > 0) {
+        setDevices(fetchedDevices);
         setUsingMockData(false);
 
         // Notify parent component about updated devices
         if (onDevicesUpdate) {
-          onDevicesUpdate(updatedDevices);
+          onDevicesUpdate(fetchedDevices);
         }
       } else {
-        throw new Error('Failed to fetch device data');
+        // If we get an empty array but no error, show empty state
+        setDevices([]);
+        setUsingMockData(false);
+
+        if (onDevicesUpdate) {
+          onDevicesUpdate([]);
+        }
       }
     } catch (err) {
       console.error('Error fetching devices:', err);
-      setError('Failed to load device data. Using mock data instead.');
+      setError('Failed to load device data. Using fallback data instead.');
 
-      // Fallback to mock data if API fails
-      setDevices(mockDevices);
+      // Get fallback data from the service (it already handles the fallback internally)
+      const fallbackDevices = await deviceService.getAllDevices();
+      setDevices(fallbackDevices);
       setUsingMockData(true);
 
-      // Notify parent component about fallback to mock data
+      // Notify parent component about fallback data
       if (onDevicesUpdate) {
-        onDevicesUpdate(mockDevices);
+        onDevicesUpdate(fallbackDevices);
       }
     } finally {
       setLoading(false);
@@ -91,10 +82,13 @@ export default function DeviceList({
   const handleRefresh = () => {
     fetchDevices();
   };
-
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      {' '}
+      <div
+        className="flex justify-between items-center mb-6"
+        data-refresh-trigger
+      >
         <div>
           {usingMockData && (
             <div className="flex items-center text-amber-600 text-sm">
@@ -114,27 +108,24 @@ export default function DeviceList({
           Refresh
         </Button>
       </div>
-
-      {loading ? (
-        <Card className="p-8 flex justify-center items-center">
-          <div className="flex flex-col items-center">
-            <RefreshCw className="h-10 w-10 text-muted-foreground animate-spin mb-4" />
-            <h3 className="text-lg font-medium">Loading devices...</h3>
-          </div>
-        </Card>
-      ) : (
+      <DataLoadingWrapper
+        isLoading={loading}
+        loadingText="Fetching device data from API..."
+        fullScreen={false}
+        size="lg"
+      >
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {devices.map((device) => (
-              <DeviceCard
-                key={device.id}
-                device={device}
-                onDeviceAction={onDeviceAction}
-              />
-            ))}
-          </div>
-
-          {devices.length === 0 && (
+          {devices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {devices.map((device) => (
+                <DeviceCard
+                  key={device.id}
+                  device={device}
+                  onDeviceAction={onDeviceAction}
+                />
+              ))}
+            </div>
+          ) : (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="bg-muted/50 p-6 rounded-full">
                 <Smartphone className="h-10 w-10 text-muted-foreground" />
@@ -151,7 +142,7 @@ export default function DeviceList({
             </div>
           )}
         </>
-      )}
+      </DataLoadingWrapper>
     </div>
   );
 }

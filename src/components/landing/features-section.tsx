@@ -47,27 +47,27 @@ export function FeaturesSection() {
   // Will be used in future feature expansion
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const iconStyles = [
-    { bg: 'bg-[#2979FF]/10', color: 'text-[#2979FF]' }, // Blue
-    { bg: 'bg-[#9C27B0]/10', color: 'text-[#9C27B0]' }, // Purple
-    { bg: 'bg-[#FF9800]/10', color: 'text-[#FF9800]' }, // Orange
-    { bg: 'bg-[#00BCD4]/10', color: 'text-[#00BCD4]' }, // Cyan
-    { bg: 'bg-[#F06292]/10', color: 'text-[#F06292]' }, // Pink
-    { bg: 'bg-[#43A047]/10', color: 'text-[#43A047]' }, // Green
-    { bg: 'bg-[#FFD54F]/10', color: 'text-[#FFD54F]' }, // Yellow
-    { bg: 'bg-[#5E35B1]/10', color: 'text-[#5E35B1]' }, // Deep Purple
-    { bg: 'bg-[#26A69A]/10', color: 'text-[#26A69A]' }, // Teal
+    { bg: 'bg-primary/10', color: 'text-primary' }, // Blue
+    { bg: 'bg-purple-500/10', color: 'text-purple-500' }, // Purple
+    { bg: 'bg-orange-500/10', color: 'text-orange-500' }, // Orange
+    { bg: 'bg-cyan-500/10', color: 'text-cyan-500' }, // Cyan
+    { bg: 'bg-pink-500/10', color: 'text-pink-500' }, // Pink
+    { bg: 'bg-green-500/10', color: 'text-green-500' }, // Green
+    { bg: 'bg-yellow-500/10', color: 'text-yellow-500' }, // Yellow
+    { bg: 'bg-violet-500/10', color: 'text-violet-500' }, // Deep Purple
+    { bg: 'bg-teal-500/10', color: 'text-teal-500' }, // Teal
   ];
 
   return (
     <section
       id="features"
-      className="py-24 bg-gradient-to-b from-[#F5F8FA] to-white relative overflow-hidden"
+      className="py-24 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden"
     >
       {/* Subtle background patterns */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-        <div className="absolute top-10 left-10 w-40 h-40 rounded-full bg-[#2979FF]" />
-        <div className="absolute bottom-40 right-10 w-60 h-60 rounded-full bg-[#9C27B0]" />
-        <div className="absolute top-1/3 right-1/4 w-20 h-20 rounded-full bg-[#FFD54F]" />
+        <div className="absolute top-10 left-10 w-40 h-40 rounded-full bg-primary" />
+        <div className="absolute bottom-40 right-10 w-60 h-60 rounded-full bg-purple-500" />
+        <div className="absolute top-1/3 right-1/4 w-20 h-20 rounded-full bg-yellow-500" />
       </div>
 
       <div className="container px-4 mx-auto relative">
@@ -78,9 +78,9 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-3xl font-bold tracking-tight mb-4 text-[#222831]"
+            className="text-3xl font-bold tracking-tight mb-4 text-foreground"
           >
-            <span className="text-[#2979FF]">Full Features</span> For Everyone —
+            <span className="text-primary">Full Features</span> For Everyone —
             No Exceptions
           </motion.h2>
           <motion.p
@@ -88,7 +88,7 @@ export function FeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-xl text-[#222831]/80 leading-relaxed"
+            className="text-xl text-muted-foreground leading-relaxed"
           >
             API access, advanced scheduling, message paraphrasing, and 24/7
             support— all included for every user, regardless of spend level.
@@ -124,22 +124,22 @@ export function FeaturesSection() {
             transition={{ duration: 0.4 }}
           >
             {' '}
-            <TabsList className="flex w-full max-w-xl bg-white p-1.5 rounded-full border border-[#E5E7EB] shadow-sm gap-1">
+            <TabsList className="flex w-full max-w-xl bg-card p-1.5 rounded-full border border-border shadow-sm gap-1">
               <TabsTrigger
                 value="bulk"
-                className="flex-1 data-[state=active]:bg-[#2979FF] data-[state=active]:text-white text-[#222831] hover:text-[#2979FF] data-[state=active]:shadow-md transition-all duration-200 rounded-full py-2.5 font-medium"
+                className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground hover:text-primary data-[state=active]:shadow-md transition-all duration-200 rounded-full py-2.5 font-medium"
               >
                 Bulk Messaging
               </TabsTrigger>
               <TabsTrigger
                 value="targeting"
-                className="flex-1 data-[state=active]:bg-[#2979FF] data-[state=active]:text-white text-[#222831] hover:text-[#2979FF] data-[state=active]:shadow-md transition-all duration-200 rounded-full py-2.5 font-medium"
+                className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground hover:text-primary data-[state=active]:shadow-md transition-all duration-200 rounded-full py-2.5 font-medium"
               >
                 Advanced Targeting
               </TabsTrigger>
               <TabsTrigger
                 value="analytics"
-                className="flex-1 data-[state=active]:bg-[#2979FF] data-[state=active]:text-white text-[#222831] hover:text-[#2979FF] data-[state=active]:shadow-md transition-all duration-200 rounded-full py-2.5 font-medium"
+                className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground hover:text-primary data-[state=active]:shadow-md transition-all duration-200 rounded-full py-2.5 font-medium"
               >
                 Analytics & Reports
               </TabsTrigger>
@@ -160,23 +160,23 @@ export function FeaturesSection() {
                   transition={{ duration: 0.5, delay: 0 }}
                   className="group"
                 >
-                  <Card className="h-full border-2 border-[#E5E7EB] bg-white relative overflow-hidden hover:shadow-xl hover:border-[#2979FF] transition-all duration-300 group-hover:-translate-y-1">
+                  <Card className="h-full border-2 border-border bg-card relative overflow-hidden hover:shadow-xl hover:border-primary transition-all duration-300 group-hover:-translate-y-1">
                     <div className="absolute top-0 right-0 mt-4 mr-4">
                       <Badge
                         variant="default"
-                        className="bg-[#2979FF] hover:bg-[#1565C0]"
+                        className="bg-primary hover:bg-primary/90"
                       >
                         Popular
                       </Badge>
                     </div>
                     <CardHeader>
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#2979FF]/90 to-[#1565C0] flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300">
-                        <MessageCircle className="w-7 h-7 text-white" />
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/90 to-primary flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                        <MessageCircle className="w-7 h-7 text-primary-foreground" />
                       </div>
-                      <CardTitle className="text-[#222831] text-xl">
+                      <CardTitle className="text-card-foreground text-xl">
                         Mass Messaging
                       </CardTitle>
-                      <CardDescription className="text-[#222831]/70 font-medium mt-1">
+                      <CardDescription className="text-muted-foreground font-medium mt-1">
                         Reach thousands in seconds
                       </CardDescription>
                     </CardHeader>

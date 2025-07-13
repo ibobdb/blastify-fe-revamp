@@ -73,6 +73,7 @@ src/
 
    ```
    NEXT_PUBLIC_API_URL=http://your-api-url.com/api
+   NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-midtrans-client-key
    ```
 
 4. Start the development server:

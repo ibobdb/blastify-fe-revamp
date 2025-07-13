@@ -6,7 +6,7 @@ export default function ClientOnly({
   children,
   fallback = null,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode | (() => React.ReactNode);
   fallback?: React.ReactNode;
 }) {
   const [hasMounted, setHasMounted] = useState(false);
@@ -19,5 +19,11 @@ export default function ClientOnly({
     return fallback;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {typeof children === 'function'
+        ? (children as () => React.ReactNode)()
+        : children}
+    </>
+  );
 }

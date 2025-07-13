@@ -30,30 +30,55 @@ const authService = {
   /**
    * Login function that authenticates the user and securely stores tokens
    * @param credentials User login credentials
+   * @param rememberMe Whether to extend token expiry times for persistent login
    * @returns Promise with user data and success status
-   */ login: async (credentials: LoginCredentials) => {
+   */ login: async (
+    credentials: LoginCredentials,
+    rememberMe: boolean = false
+  ) => {
     authLogger.info('Login attempt', { email: credentials.email });
     try {
       const response = await api.post('/auth/login', credentials);
       const { status, message, data } = response.data;
 
-      if (status) {
+      if (status && data) {
         const { accessToken, refreshToken } = data;
-        authLogger.debug('Login successful, setting tokens');
+
+        // Validate that we received tokens
+        if (!accessToken || !refreshToken) {
+          authLogger.error('Login response missing tokens', {
+            hasAccessToken: !!accessToken,
+            hasRefreshToken: !!refreshToken,
+          });
+          throw new Error('Authentication failed - invalid server response');
+        }
+
+        authLogger.debug('Login successful, setting tokens', { rememberMe });
+
+        // Set token expiry times based on rememberMe preference
+        const accessTokenExpiry = rememberMe ? 1 : 1 / 24; // 24 hours if remember me, 1 hour if not
+        const refreshTokenExpiry = rememberMe ? 30 : 7; // 30 days if remember me, 7 days if not
 
         // Store tokens in secure cookies
         Cookies.set('accessToken', accessToken, {
           ...COOKIE_OPTIONS,
-          expires: 1 / 24, // 1 hour expiry
+          expires: accessTokenExpiry,
         });
 
         Cookies.set('refreshToken', refreshToken, {
           ...COOKIE_OPTIONS,
-          expires: 7, // 7 day expiry
+          expires: refreshTokenExpiry,
         });
 
         // Decode user data from JWT
         const decodedToken: any = jwtDecode(accessToken);
+
+        // Validate decoded token has required fields
+        if (!decodedToken.id || !decodedToken.email || !decodedToken.name) {
+          authLogger.error('Invalid token structure', { decodedToken });
+          throw new Error('Authentication failed - invalid token structure');
+        }
+
         const user = {
           id: decodedToken.id,
           name: decodedToken.name,
@@ -297,6 +322,39 @@ const authService = {
     await mockDelay();
     return { user: { ...mockUser, ...profileData } };
   },
+  /**
+   * Validate current user's password
+   * @param password The password to validate
+   * @returns Promise with validation result
+   */
+  validatePassword: async (password: string) => {
+    authLogger.info('Password validation attempt');
+    try {
+      const response = await api.post('/auth/validate-password', {
+        password,
+      });
+      const { status, message } = response.data;
+
+      if (status) {
+        authLogger.info('Password validation successful');
+        return {
+          success: true,
+          message: message || 'Password is valid',
+        };
+      } else {
+        authLogger.warn('Password validation failed', { message });
+        throw new Error(message || 'Invalid password');
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to validate password';
+      authLogger.error('Password validation error', error);
+      throw new Error(errorMessage);
+    }
+  },
+
   /**
    * Logout function - removes authentication tokens and clears session
    * No API call required since we don't have a logout endpoint

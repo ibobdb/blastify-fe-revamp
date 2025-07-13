@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NotificationList } from './notification-list';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ import {
 import { useAuth } from '@/context';
 import { useLogout } from '@/hooks/useLogout';
 import { getUserInitials } from '@/lib/utils';
+import { QuotaNav } from './quota-nav';
 import {
   Bell,
   Menu,
@@ -28,6 +30,7 @@ import {
   LogOut,
   Settings,
 } from 'lucide-react';
+import { QuotaAddNav } from './quota-add-nav';
 
 interface DashboardNavbarProps {
   onMenuClick: () => void;
@@ -64,7 +67,7 @@ export function DashboardNavbar({ onMenuClick }: DashboardNavbarProps) {
 
   const userInitials = user?.name ? getUserInitials(user.name) : 'U';
   return (
-    <header className="bg-white dark:bg-gray-950 border-b border-border h-16 flex items-center px-6 md:px-8 justify-between sticky top-0 z-10 shadow-sm">
+    <header className="bg-white dark:bg-gray-950 border-b border-border h-16 flex items-center px-6 md:px-8 justify-between sticky top-0 z-10 shadow-sm py-4">
       {/* Left Side - Menu Button and Search */}
       <div className="flex items-center">
         <Button
@@ -102,39 +105,15 @@ export function DashboardNavbar({ onMenuClick }: DashboardNavbarProps) {
       </div>{' '}
       {/* Right Side - Icons and Profile */}
       <div className="flex items-center space-x-2 md:space-x-3">
-        {/* Language Selector */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Select language">
-              <Globe className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>English</DropdownMenuItem>
-            <DropdownMenuItem>Bahasa Indonesia</DropdownMenuItem>
-            <DropdownMenuItem>Español</DropdownMenuItem>
-            <DropdownMenuItem>Français</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          {theme === 'dark' ? (
-            <Sun className="h-5 w-5" />
-          ) : (
-            <Moon className="h-5 w-5" />
-          )}
-        </Button>
-
+        {/* Quota / Credit */}
+        <QuotaNav />
+        {/* Quota ADD */}
+        <QuotaAddNav />
         {/* Notifications */}
-        <Button variant="ghost" size="icon" aria-label="Notifications">
+        {/* <Button variant="ghost" size="icon" aria-label="Notifications">
           <Bell className="h-5 w-5" />
-        </Button>
+        </Button> */}
+        <NotificationList />
 
         {/* User Profile Dropdown */}
         <DropdownMenu>

@@ -7,7 +7,7 @@ import { CheckCircle } from 'lucide-react';
 
 export function CtaSection() {
   return (
-    <section className="py-20 bg-gradient-to-r from-[#2979FF] to-[#1565C0]">
+    <section className="py-20 bg-gradient-to-r from-primary to-primary/80">
       <div className="container px-4 mx-auto">
         {' '}
         <motion.div
@@ -17,17 +17,17 @@ export function CtaSection() {
           transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
             Start With 100 Free Credits, No Commitment
           </h2>
-          <p className="text-xl md:text-2xl text-white/90 mb-10">
+          <p className="text-xl md:text-2xl text-primary-foreground/90 mb-10">
             All features. No subscriptions. Just buy credits when you need more.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              className="bg-white text-[#2979FF] hover:bg-white/90 text-lg px-8"
+              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 text-lg px-8"
               asChild
             >
               <Link href="/signup">Get 100 Free Credits</Link>
@@ -35,7 +35,7 @@ export function CtaSection() {
             <Button
               size="lg"
               variant="outline"
-              className="bg-transparent border-white text-white hover:bg-white/10 text-lg px-8"
+              className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 text-lg px-8"
               asChild
             >
               <Link href="/contact">See How It Works</Link>
@@ -43,17 +43,21 @@ export function CtaSection() {
           </div>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full">
-              <CheckCircle className="h-4 w-4 text-white" />
-              <p className="text-sm text-white">No hidden fees</p>
+            <div className="flex items-center gap-2 bg-primary-foreground/20 px-3 py-1 rounded-full">
+              <CheckCircle className="h-4 w-4 text-primary-foreground" />
+              <p className="text-sm text-primary-foreground">No hidden fees</p>
             </div>
-            <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full">
-              <CheckCircle className="h-4 w-4 text-white" />
-              <p className="text-sm text-white">No credit card required</p>
+            <div className="flex items-center gap-2 bg-primary-foreground/20 px-3 py-1 rounded-full">
+              <CheckCircle className="h-4 w-4 text-primary-foreground" />
+              <p className="text-sm text-primary-foreground">
+                No credit card required
+              </p>
             </div>
-            <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full">
-              <CheckCircle className="h-4 w-4 text-white" />
-              <p className="text-sm text-white">Full features for everyone</p>
+            <div className="flex items-center gap-2 bg-primary-foreground/20 px-3 py-1 rounded-full">
+              <CheckCircle className="h-4 w-4 text-primary-foreground" />
+              <p className="text-sm text-primary-foreground">
+                Full features for everyone
+              </p>
             </div>
           </div>
         </motion.div>
