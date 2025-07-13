@@ -97,6 +97,16 @@ export function middleware(request: NextRequest) {
       const decodedToken: any = jwtDecode(accessToken);
       const currentTime = Math.floor(Date.now() / 1000);
 
+      // Check if token has required fields
+      if (!decodedToken.id || !decodedToken.email || !decodedToken.exp) {
+        middlewareLogger.warn(`Invalid token structure: ${pathname}`, {
+          hasId: !!decodedToken.id,
+          hasEmail: !!decodedToken.email,
+          hasExp: !!decodedToken.exp,
+        });
+        throw new Error('Invalid token structure');
+      }
+
       // Check token expiration
       if (!decodedToken.exp || decodedToken.exp <= currentTime) {
         middlewareLogger.warn(`Expired token access attempt: ${pathname}`, {

@@ -75,6 +75,18 @@ function SignInForm() {
     },
   });
 
+  // Load remembered email on component mount
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    const wasRemembered = localStorage.getItem('rememberMe') === 'true';
+
+    if (rememberedEmail && wasRemembered) {
+      form.setValue('email', rememberedEmail);
+      form.setValue('rememberMe', true);
+      setEmailValid(validateEmail(rememberedEmail));
+    }
+  }, [form]);
+
   // Real-time email validation function
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -91,16 +103,28 @@ function SignInForm() {
     setIsLoading(true);
 
     try {
-      // We'll store the rememberMe value in localStorage in a real app
-      // For now, just log it to the console
+      // Handle remember me functionality
+      if (values.rememberMe) {
+        localStorage.setItem('rememberedEmail', values.email);
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberMe');
+      }
+
       console.log('Remember Me:', values.rememberMe);
 
-      await login(values.email, values.password);
-      // Redirect to the callback URL after successful login
-      router.push(decodeURI(callbackUrl));
+      await login(values.email, values.password, values.rememberMe);
+
+      // Only redirect and show success if login was successful
+      // The login function will throw an error if login fails
       toast.success('Login successful');
+      router.push(decodeURI(callbackUrl));
     } catch (error) {
       console.error('Login error:', error);
+      // Error is already handled by the auth context and displayed in the form
+      // The user will stay on the signin page to see the error message
+      // Do not redirect on error - just stay on the page and show the error
     } finally {
       setIsLoading(false);
     }

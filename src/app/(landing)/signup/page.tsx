@@ -207,7 +207,9 @@ export default function SignUpPage() {
       // Handle error with proper type checking
       let errorMessage = 'Registration failed. Please try again.';
 
-      if (error && typeof error === 'object' && 'response' in error) {
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error && typeof error === 'object' && 'response' in error) {
         const response = error.response as
           | { data?: { message?: string } }
           | undefined;

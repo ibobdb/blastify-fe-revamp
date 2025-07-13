@@ -20,7 +20,11 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    rememberMe?: boolean
+  ) => Promise<void>;
   logout: () => void;
   register: (
     name: string,
@@ -67,12 +71,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Real authentication functions using the auth service
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (
+    email: string,
+    password: string,
+    rememberMe: boolean = false
+  ): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await authService.login({ email, password });
+      const result = await authService.login({ email, password }, rememberMe);
       if (result.success) {
         setUser(result.user);
         setIsAuthenticated(true);
@@ -80,7 +88,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Login failed. Please check your credentials.');
       }
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please try again.');
+      const errorMessage = err.message || 'Login failed. Please try again.';
+      setError(errorMessage);
+      throw new Error(errorMessage); // Rethrow for the component to handle
     } finally {
       setLoading(false);
     }
@@ -210,6 +220,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Decode the token to get user info
           const decodedToken: any = jwtDecode(accessToken);
 
+          // Validate token structure
+          if (
+            !decodedToken.id ||
+            !decodedToken.email ||
+            !decodedToken.name ||
+            !decodedToken.exp
+          ) {
+            console.warn('Invalid token structure, clearing authentication');
+            Cookies.remove('accessToken', { path: '/' });
+            Cookies.remove('refreshToken', { path: '/' });
+            return;
+          }
+
           // Check if token is expired
           const currentTime = Date.now() / 1000;
           if (decodedToken.exp && decodedToken.exp > currentTime) {
@@ -226,17 +249,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Token is expired, try to refresh
             try {
               await authService.refreshToken();
-              // Check auth again
-              checkAuth();
+              // Recursively check auth again after refresh
+              setTimeout(checkAuth, 100);
             } catch (refreshErr) {
+              console.warn('Token refresh failed, clearing authentication');
               // Clear cookies and auth state if refresh fails
               Cookies.remove('accessToken', { path: '/' });
               Cookies.remove('refreshToken', { path: '/' });
+              setUser(null);
+              setIsAuthenticated(false);
             }
           }
         } catch (err) {
+          console.warn('Token validation failed, clearing authentication');
           // Token is invalid, remove it
           Cookies.remove('accessToken', { path: '/' });
+          Cookies.remove('refreshToken', { path: '/' });
+          setUser(null);
+          setIsAuthenticated(false);
         }
       }
     };
