@@ -12,5 +12,9 @@ export default function LandingLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className="bg-background text-foreground">{children}</div>;
+  return (
+    <div className="light bg-background text-foreground min-h-screen">
+      {children}
+    </div>
+  );
 }

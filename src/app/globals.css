@@ -189,3 +189,34 @@
   -ms-overflow-style: auto;
   /* For IE and Edge */
 }
+
+/* Force light mode for landing pages */
+
+.light,
+.light * {
+  color-scheme: light !important;
+}
+
+/* Ensure landing pages always use light theme variables regardless of user's system preference */
+
+.light {
+  --background: var(--pure-white) !important;
+  --foreground: var(--off-black) !important;
+  --card: var(--pure-white) !important;
+  --card-foreground: var(--off-black) !important;
+  --popover: var(--pure-white) !important;
+  --popover-foreground: var(--off-black) !important;
+  --primary: var(--moby-blue) !important;
+  --primary-foreground: var(--pure-white) !important;
+  --secondary: var(--light-blue) !important;
+  --secondary-foreground: var(--off-black) !important;
+  --muted: var(--light-gray) !important;
+  --muted-foreground: var(--medium-gray) !important;
+  --accent: var(--light-blue) !important;
+  --accent-foreground: var(--off-black) !important;
+  --destructive: #dc3545 !important;
+  --destructive-foreground: var(--pure-white) !important;
+  --border: #dee2e6 !important;
+  --input: #dee2e6 !important;
+  --ring: var(--moby-blue) !important;
+}
