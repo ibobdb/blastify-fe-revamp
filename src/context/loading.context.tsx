@@ -1,11 +1,11 @@
 'use client';
 
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Loading } from '@/components/ui/loading';
 
 // Define the structure of the loading context
 interface LoadingContextType {
-  showLoading: (message?: string) => void;
+  showLoading: (message?: string, timeout?: number) => void;
   hideLoading: () => void;
   isLoading: boolean;
   loadingMessage: string | undefined;
@@ -40,18 +40,45 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loadingMessage, setLoadingMessage] = useState<string | undefined>(
     undefined
   );
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   // Show the loading spinner with optional message
-  const showLoading = (message?: string) => {
+  const showLoading = (message?: string, timeout = 15000) => {
     setLoadingMessage(message);
     setIsLoading(true);
+
+    // Clear any existing timeout
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
+    // Set a timeout to automatically hide loading
+    const newTimeoutId = setTimeout(() => {
+      console.warn('Loading timeout reached - automatically hiding loading');
+      hideLoading();
+    }, timeout);
+
+    setTimeoutId(newTimeoutId);
   };
 
   // Hide the loading spinner
   const hideLoading = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
     setIsLoading(false);
     setLoadingMessage(undefined);
   };
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [timeoutId]);
 
   // Value to be provided to consumers
   const value = {

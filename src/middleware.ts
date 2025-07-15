@@ -89,7 +89,13 @@ export function middleware(request: NextRequest) {
       }
 
       middlewareLogger.debug(`Redirecting to login: ${url.toString()}`);
-      return NextResponse.redirect(url);
+      const response = NextResponse.redirect(url);
+
+      // Add headers to help client understand what happened
+      response.headers.set('X-Middleware-Redirect', 'signin');
+      response.headers.set('X-Redirect-Reason', 'no-token');
+
+      return response;
     }
 
     // We have an access token, but need to validate it
@@ -131,7 +137,10 @@ export function middleware(request: NextRequest) {
         middlewareLogger.debug(
           `Redirecting to login due to expired token: ${url.toString()}`
         );
-        return NextResponse.redirect(url);
+        const response = NextResponse.redirect(url);
+        response.headers.set('X-Middleware-Redirect', 'signin');
+        response.headers.set('X-Redirect-Reason', 'expired-token');
+        return response;
       }
 
       // Valid token, log the access
@@ -158,7 +167,10 @@ export function middleware(request: NextRequest) {
       middlewareLogger.debug(
         `Redirecting to login due to invalid token: ${url.toString()}`
       );
-      return NextResponse.redirect(url);
+      const response = NextResponse.redirect(url);
+      response.headers.set('X-Middleware-Redirect', 'signin');
+      response.headers.set('X-Redirect-Reason', 'invalid-token');
+      return response;
     }
   }
 

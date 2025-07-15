@@ -83,8 +83,15 @@ export const Loading: React.FC<LoadingProps> = ({
       document.body.style.width = '100%';
       document.body.style.overflow = 'hidden';
 
+      // Add timeout to automatically clear loading after 10 seconds to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Loading timeout reached - clearing loading state');
+        window.dispatchEvent(new CustomEvent('force-loading-cleanup'));
+      }, 10000);
+
       // Re-enable scrolling when component unmounts
       return () => {
+        clearTimeout(timeoutId);
         document.body.style.position = '';
         document.body.style.top = '';
         document.body.style.width = '';

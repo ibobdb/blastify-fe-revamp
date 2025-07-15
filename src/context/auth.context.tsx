@@ -68,7 +68,7 @@ const mockUser: User = {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState<string | null>(null);
   // Real authentication functions using the auth service
   const login = async (
@@ -230,6 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.warn('Invalid token structure, clearing authentication');
             Cookies.remove('accessToken', { path: '/' });
             Cookies.remove('refreshToken', { path: '/' });
+            setLoading(false);
             return;
           }
 
@@ -245,6 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               avatar: decodedToken.avatar,
             });
             setIsAuthenticated(true);
+            setLoading(false);
           } else {
             // Token is expired, try to refresh
             try {
@@ -258,6 +260,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               Cookies.remove('refreshToken', { path: '/' });
               setUser(null);
               setIsAuthenticated(false);
+              setLoading(false);
             }
           }
         } catch (err) {
@@ -267,7 +270,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           Cookies.remove('refreshToken', { path: '/' });
           setUser(null);
           setIsAuthenticated(false);
+          setLoading(false);
         }
+      } else {
+        // No token found, user is not authenticated
+        setLoading(false);
       }
     };
 

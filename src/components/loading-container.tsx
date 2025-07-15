@@ -4,21 +4,24 @@ import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { PageLoading } from '@/components/ui/loading';
 import logger from '@/utils/logger';
+import { useAuth } from '@/context';
 
 // Create a logger instance for the loading container
 const loadingLogger = logger.child('LoadingContainer');
 
 /**
  * LoadingContainer acts as a wrapper component that shows a loading state
- * for page transitions, data fetching, etc.
+ * for page transitions. Simplified to prevent conflicts with auth redirects.
  */
 export const LoadingContainer = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
+  const { loading: authLoading } = useAuth();
+
   // Check if current path is part of the landing page routes
   const isLandingPage =
     pathname === '/' ||
@@ -33,46 +36,36 @@ export const LoadingContainer = ({
     pathname?.startsWith('/contact');
 
   useEffect(() => {
-    // Immediately set loading state based on path
+    // Don't show loading if auth is still loading (prevents double loading)
+    if (authLoading) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Don't show loading for landing pages
     if (isLandingPage) {
-      // For landing pages, immediately hide loading
       setIsLoading(false);
       loadingLogger.debug(`Skipping loading for landing page: ${pathname}`);
       return;
-    } else {
-      // For protected pages, show loading initially
-      setIsLoading(true);
-      loadingLogger.debug(`Loading page: ${pathname}`);
     }
 
-    // Simulate loading delay for page transitions
+    // For protected pages, show brief loading
+    setIsLoading(true);
+    loadingLogger.debug(`Loading page: ${pathname}`);
+
+    // Simulate loading delay for page transitions (shorter delay)
     const loadingTimeout = setTimeout(() => {
       setIsLoading(false);
       loadingLogger.debug(`Page loaded: ${pathname}`);
-    }, 800); // Show loading for 800ms for smooth transitions
+    }, 300); // Reduced from 800ms to 300ms
 
     return () => {
-      // Clear timeout when component unmounts or path changes
       clearTimeout(loadingTimeout);
     };
-  }, [pathname, isLandingPage]);
+  }, [pathname, isLandingPage, authLoading]);
 
-  // Don't wrap landing pages with the loading container
-  if (isLandingPage) {
-    return <>{children}</>;
-  }
-
-  // For protected/dashboard pages, show loading indicator
-  return (
-    <>
-      {' '}
-      {isLoading ? (
-        <PageLoading fullScreen text="Loading page..." />
-      ) : (
-        <>{children}</>
-      )}
-    </>
-  );
+  // Always render children without loading overlay to prevent conflicts
+  return <>{children}</>;
 };
 
 export default LoadingContainer;

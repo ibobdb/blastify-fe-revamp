@@ -19,45 +19,41 @@ const protectedRouteLogger = logger.child('ProtectedRoute');
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading: authLoading } = useAuth();
-  const { showLoading, hideLoading } = useLoading();
   const pathname = usePathname();
   const router = useRouter();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // If auth is still loading, show loading indicator
+    // If auth is still loading, just wait
     if (authLoading) {
-      showLoading('Verifying authentication...');
       protectedRouteLogger.debug('Authentication verification in progress');
       return;
     }
 
     // Check if we should have access to this route
-    const { hasAccess, redirectTo } = checkProtectedRouteAccess(pathname);
+    const { hasAccess, redirectTo } = checkProtectedRouteAccess(
+      pathname || '/'
+    );
 
     if (!hasAccess && redirectTo) {
       protectedRouteLogger.info(
         `Access denied to ${pathname}, redirecting to ${redirectTo}`
       );
-      showLoading('Redirecting to login...');
-      router.push(redirectTo);
+      // Don't show loading for redirect, let the middleware handle it
+      router.replace(redirectTo);
     } else {
       protectedRouteLogger.debug(`Access granted to ${pathname}`);
       setChecking(false);
-      hideLoading();
     }
-  }, [
-    isAuthenticated,
-    authLoading,
-    pathname,
-    router,
-    showLoading,
-    hideLoading,
-  ]);
+  }, [isAuthenticated, authLoading, pathname, router]);
 
-  // Show loading while checking authentication
+  // Show simple loading while checking authentication (not full screen)
   if (authLoading || checking) {
-    return <Loading fullScreen text="Verifying access..." />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loading text="Verifying access..." />
+      </div>
+    );
   }
 
   // Authentication successful, render the protected content
