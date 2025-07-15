@@ -4,8 +4,8 @@ import { getSecurityHeaders } from './src/utils/security-headers';
 const nextConfig: NextConfig = {
   /* config options here */
 
-  // Re-enable standalone output after fixing manifest issues
-  output: 'standalone',
+  // Temporarily disable standalone output to fix client reference manifest issues
+  // output: 'standalone',
 
   // Improve build performance
   compiler: {
@@ -56,23 +56,6 @@ const nextConfig: NextConfig = {
           url: false,
         };
       }
-
-      // Add rule to handle client reference manifests properly
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          ...config.optimization.splitChunks,
-          cacheGroups: {
-            ...config.optimization.splitChunks?.cacheGroups,
-            clientManifest: {
-              name: 'client-manifest',
-              chunks: 'all',
-              test: /client.*manifest/,
-              enforce: true,
-            },
-          },
-        },
-      };
     }
 
     return config;

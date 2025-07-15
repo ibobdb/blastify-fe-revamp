@@ -17,7 +17,7 @@ import { usePathname } from 'next/navigation';
 
 export function LandingNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() || '/';
 
   // Nav items
   const navItems = [
