@@ -58,6 +58,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   pagination: DataTablePaginationProps;
   loading?: boolean;
+  actionButtons?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -68,8 +69,7 @@ export function DataTable<TData, TValue>({
   loading = false,
   onSearch,
   onRowClick,
-  title = 'Messages Overview',
-  description = 'Showing all broadcast messages and their status',
+  actionButtons,
 }: DataTableProps<TData, TValue> & {
   onRefresh?: () => void;
   onSearch?: (value: string) => void;
@@ -116,32 +116,29 @@ export function DataTable<TData, TValue>({
   return (
     <div className="w-full">
       <div className="flex justify-between py-4 gap-2">
-        <div className="grid">
-          <span className="font-semibold text-base mr-2">{title}</span>
-          <span className="text-xs text-muted-foreground">{description}</span>
-        </div>
-        <div className="flex gap-2">
-          <form onSubmit={handleSearchSubmit} className="ml-4 mr-2">
-            <Input
-              ref={inputRef}
-              placeholder="Search..."
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              className="max-w-sm h-8"
-            />
-          </form>
-          <Button
-            variant="outline"
-            size={'sm'}
-            className="ml-auto cursor-pointer h-8 px-2 text-xs"
-            onClick={onRefresh}
-            aria-label="Refresh"
-            disabled={loading}
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </Button>
-        </div>
+        <form onSubmit={handleSearchSubmit} className="">
+          <Input
+            ref={inputRef}
+            placeholder="Search..."
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+            className="min-w-md h-8 bg-white dark:bg-gray-800 text-sm"
+          />
+        </form>
+        <Button
+          variant="outline"
+          size={'sm'}
+          className="ml-auto cursor-pointer h-8 px-2 text-xs"
+          onClick={onRefresh}
+          aria-label="Refresh"
+          disabled={loading}
+        >
+          <RefreshCw className="h-3 w-3 mr-1" />
+          {loading ? 'Refreshing...' : 'Refresh'}
+        </Button>
+        {actionButtons && (
+          <div className="flex items-center gap-2">{actionButtons}</div>
+        )}
       </div>
 
       <div className="rounded-md border relative min-h-[200px] max-h-[600px] overflow-auto">
@@ -167,7 +164,9 @@ export function DataTable<TData, TValue>({
               ))}
             </TableHeader>
             <TableBody
-              className={loading ? 'opacity-20 pointer-events-none' : ''}
+              className={
+                loading ? 'opacity-20 pointer-events-none' : 'bg-white'
+              }
             >
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (

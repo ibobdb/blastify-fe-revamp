@@ -6,7 +6,15 @@ import { DataTable } from '@/components/dashboard/datatable';
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Copy, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Copy,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  KeyIcon,
+} from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -371,17 +379,7 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">API Keys</h2>
-          <p className="text-muted-foreground">
-            Manage your API keys for accessing the Blastify API
-          </p>
-        </div>
-        <Button onClick={onCreateNew}>Create New API Key</Button>
-      </div>
-
+    <>
       <DataTable
         columns={columns}
         data={data}
@@ -396,6 +394,15 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
         loading={loading}
         title="API Keys"
         description="Manage your API keys for accessing the Blastify API"
+        actionButtons={
+          <Button
+            onClick={onCreateNew}
+            size={'sm'}
+            className="ml-auto cursor-pointer h-8 px-2 text-xs"
+          >
+            <KeyIcon size={14} /> New Key
+          </Button>
+        }
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -428,6 +435,6 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
         description="Please enter your password to perform this sensitive action."
         actionLabel="Confirm"
       />
-    </div>
+    </>
   );
 }
