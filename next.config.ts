@@ -4,8 +4,13 @@ import { getSecurityHeaders } from './src/utils/security-headers';
 const nextConfig: NextConfig = {
   /* config options here */
 
-  // Enable standalone output for Docker optimization
+  // Re-enable standalone output after fixing manifest issues
   output: 'standalone',
+
+  // Improve build performance
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
 
   // External packages for server components
   serverExternalPackages: [],
@@ -38,7 +43,7 @@ const nextConfig: NextConfig = {
   webpack: (config, { isServer, dev }) => {
     // Only apply webpack config when not in development with Turbopack
     if (!dev || !process.env.TURBOPACK) {
-      // Don't resolve 'fs' module on the client to prevent this error on build --> Error: Can't resolve 'fs'
+      // Fix client reference manifest issues in route groups
       if (!isServer) {
         config.resolve.fallback = {
           fs: false,
@@ -51,6 +56,23 @@ const nextConfig: NextConfig = {
           url: false,
         };
       }
+
+      // Add rule to handle client reference manifests properly
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          ...config.optimization.splitChunks,
+          cacheGroups: {
+            ...config.optimization.splitChunks?.cacheGroups,
+            clientManifest: {
+              name: 'client-manifest',
+              chunks: 'all',
+              test: /client.*manifest/,
+              enforce: true,
+            },
+          },
+        },
+      };
     }
 
     return config;

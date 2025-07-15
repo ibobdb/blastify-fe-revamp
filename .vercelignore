@@ -1,0 +1,18 @@
+# Vercelignore file to optimize builds
+
+node_modules
+.git
+.gitignore
+README.md
+CHANGELOG.md
+SECURITY.md
+docs/
+logs/
+scripts/
+docker-compose.yml
+Dockerfile
+.dockerignore
+_.log
+_.md
+.env.local
+.env.\*.local
