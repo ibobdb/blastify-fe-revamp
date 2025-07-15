@@ -2,10 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useLoading } from '@/context/loading.context';
-import logger from '@/utils/logger';
-
-// Create a logger instance
-const loadingHookLogger = logger.child('useLoadingState');
 
 type UseLoadingStateOptions = {
   /**
@@ -51,10 +47,8 @@ export const useLoadingState = ({
 
     if (isLoading) {
       showLoading(loadingMessage);
-      loadingHookLogger.debug(`${name}: Started loading - ${loadingMessage}`);
     } else {
       hideLoading();
-      loadingHookLogger.debug(`${name}: Finished loading`);
     }
 
     return () => {
@@ -100,7 +94,6 @@ export const useLoadingState = ({
     ): Promise<T> => {
       try {
         startLoading(options?.message);
-        loadingHookLogger.debug(`${name}: Starting async operation`);
 
         const result = await asyncFn();
 
@@ -110,14 +103,12 @@ export const useLoadingState = ({
 
         return result;
       } catch (error) {
-        loadingHookLogger.error(`${name}: Error in async operation`, error);
         if (options?.onError) {
           options.onError(error);
         }
         throw error;
       } finally {
         stopLoading();
-        loadingHookLogger.debug(`${name}: Finished async operation`);
       }
     },
     [startLoading, stopLoading, name]

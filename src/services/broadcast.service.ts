@@ -1,10 +1,5 @@
-// Broadcast service
-import api from '@/services/api';
-import logger from '@/utils/logger';
-
 // Create a broadcast-specific logger instance
-const broadcastLogger = logger.child('BroadcastService');
-
+import api from '@/services/api';
 export interface BroadcastMessage {
   content: string;
   numbers: string[];
@@ -49,7 +44,7 @@ const broadcastService = {
   sendBroadcast: async (
     broadcastData: BroadcastMessage
   ): Promise<BroadcastSendResponse> => {
-    broadcastLogger.info('Sending broadcast message', { broadcastData });
+    // Sending broadcast message
 
     try {
       // Validate input data
@@ -84,17 +79,17 @@ const broadcastService = {
       );
 
       // Log the response
-      broadcastLogger.info('Broadcast message sent successfully', { response });
+      // Broadcast message sent successfully
 
       return response.data;
     } catch (error) {
       // Log the error
-      broadcastLogger.error('Failed to send broadcast message', { error });
+      // Failed to send broadcast message
       throw error;
     }
   },
   generateParaphrase: async (content: string): Promise<ParaphraseResponse> => {
-    broadcastLogger.info('Generating paraphrase', { content });
+    // Generating paraphrase
     try {
       // Validate input data
       if (!content || !content.trim()) {
@@ -106,13 +101,13 @@ const broadcastService = {
       );
       return response.data;
     } catch (error) {
-      broadcastLogger.error('Failed to generate paraphrase', { error });
+      // Failed to generate paraphrase
       throw error;
     }
   },
   importContact: async (): Promise<ImportContactResponse> => {
     try {
-      broadcastLogger.info('Importing contacts');
+      // Importing contacts
       // Send the request to the API
       const response = await api.get<ImportContactResponse>(
         '/client/get-contact'
@@ -120,7 +115,7 @@ const broadcastService = {
       // broadcastLogger.info('Contacts imported successfully', { response });
       return response.data;
     } catch (error) {
-      broadcastLogger.error('Failed to import contacts', { error });
+      // Failed to import contacts
       throw error;
     }
   },

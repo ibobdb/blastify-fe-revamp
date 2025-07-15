@@ -3,11 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { PageLoading } from '@/components/ui/loading';
-import logger from '@/utils/logger';
 import { useAuth } from '@/context';
-
-// Create a logger instance for the loading container
-const loadingLogger = logger.child('LoadingContainer');
 
 /**
  * LoadingContainer acts as a wrapper component that shows a loading state
@@ -45,18 +41,15 @@ export const LoadingContainer = ({
     // Don't show loading for landing pages
     if (isLandingPage) {
       setIsLoading(false);
-      loadingLogger.debug(`Skipping loading for landing page: ${pathname}`);
       return;
     }
 
     // For protected pages, show brief loading
     setIsLoading(true);
-    loadingLogger.debug(`Loading page: ${pathname}`);
 
     // Simulate loading delay for page transitions (shorter delay)
     const loadingTimeout = setTimeout(() => {
       setIsLoading(false);
-      loadingLogger.debug(`Page loaded: ${pathname}`);
     }, 300); // Reduced from 800ms to 300ms
 
     return () => {

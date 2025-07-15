@@ -198,7 +198,7 @@ export function DashboardSidebar({
         </div>
       </div>
       {/* Navigation Items */}
-      <ScrollArea className="flex-grow">
+      <div className="flex-grow overflow-y-auto">
         <div className={cn('px-3 py-4', isCollapsed ? 'px-2' : '')}>
           {navigation.map((group, idx) => (
             <SidebarGroup
@@ -219,7 +219,7 @@ export function DashboardSidebar({
             </SidebarGroup>
           ))}
         </div>
-      </ScrollArea>{' '}
+      </div>{' '}
       {/* Sidebar Footer */}
       <div
         className={cn(

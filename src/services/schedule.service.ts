@@ -1,8 +1,4 @@
 import api from '@/services/api';
-import logger from '@/utils/logger';
-
-// Create a device-specific logger instance
-const scheduleLogger = logger.child('ScheduleLogger');
 
 export interface ScheduleResponse {
   status: boolean;

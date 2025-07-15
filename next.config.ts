@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [],
   },
 
+  // Turbopack configuration (stable as of Next.js 15)
+  turbopack: {},
+
   // Setting this to false can help bypass TypeScript errors in development
   typescript: {
     // This ignores TypeScript errors during builds
@@ -31,20 +34,23 @@ const nextConfig: NextConfig = {
   // Remove the X-Powered-By header
   poweredByHeader: false,
 
-  // Webpack configuration to handle Node.js modules properly
-  webpack: (config, { isServer }) => {
-    // Don't resolve 'fs' module on the client to prevent this error on build --> Error: Can't resolve 'fs'
-    if (!isServer) {
-      config.resolve.fallback = {
-        fs: false,
-        path: false,
-        crypto: false,
-        stream: false,
-        util: false,
-        buffer: false,
-        querystring: false,
-        url: false,
-      };
+  // Webpack configuration for production builds (when not using Turbopack)
+  webpack: (config, { isServer, dev }) => {
+    // Only apply webpack config when not in development with Turbopack
+    if (!dev || !process.env.TURBOPACK) {
+      // Don't resolve 'fs' module on the client to prevent this error on build --> Error: Can't resolve 'fs'
+      if (!isServer) {
+        config.resolve.fallback = {
+          fs: false,
+          path: false,
+          crypto: false,
+          stream: false,
+          util: false,
+          buffer: false,
+          querystring: false,
+          url: false,
+        };
+      }
     }
 
     return config;

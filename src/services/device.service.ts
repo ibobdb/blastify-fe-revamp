@@ -8,10 +8,6 @@ import {
   mapApiStatusToUiStatus,
 } from '@/types/device';
 import api from '@/services/api';
-import logger from '@/utils/logger';
-
-// Create a device-specific logger instance
-const deviceLogger = logger.child('DeviceService');
 
 // Mock delay function to simulate API calls
 const mockDelay = (ms: number = 500) =>
@@ -64,7 +60,6 @@ export const deviceService = {
    */
   getClientStatus: async (): Promise<ClientResponse> => {
     try {
-      deviceLogger.info('Fetching client status');
       const response = await api.get('/client');
 
       // Handle "Client not found" response
@@ -73,7 +68,6 @@ export const deviceService = {
         (response.data.message === 'Client not found' ||
           response.data.code === 'NOT_FOUND')
       ) {
-        deviceLogger.info('No clients found - client not found');
         return {
           status: false,
           message: 'No devices connected',
@@ -85,11 +79,8 @@ export const deviceService = {
         };
       }
 
-      deviceLogger.info('Client data retrieved successfully');
       return response.data;
     } catch (error) {
-      deviceLogger.error('Error fetching client status', error);
-
       // Fallback to mock data if the API call fails
       await mockDelay();
 
@@ -117,19 +108,14 @@ export const deviceService = {
     message?: string;
   }> => {
     try {
-      deviceLogger.info('Polling QR code status');
-
       const response = await api.get('/client/qr');
 
-      deviceLogger.debug('QR code status retrieved successfully');
       return {
         status: response.data.data?.status || response.data.status,
         qrCode: response.data.data?.qrCode || response.data.qrCode,
         message: response.data.message,
       };
     } catch (error) {
-      deviceLogger.error('Error polling QR code status', error);
-
       // Return error status
       return {
         status: 'ERROR',
@@ -154,13 +140,11 @@ export const deviceService = {
     status?: string;
   }> => {
     try {
-      deviceLogger.info(`Initiating reconnection for device ${deviceId}`); // Use the same endpoint as connectDevice
+      // Use the same endpoint as connectDevice
       const response = await api.post('/client/connect', {
         // Include the deviceId for reconnection
         clientId: deviceId,
       });
-
-      deviceLogger.info(`Device reconnection initiated for ${deviceId}`);
 
       // Check if device is immediately connected (no QR needed)
       if (response.data.data?.status === 'CONNECTED') {
@@ -179,8 +163,6 @@ export const deviceService = {
         message: response.data.message,
       };
     } catch (error) {
-      deviceLogger.error(`Error reconnecting device ${deviceId}`, error);
-
       // Check if we're in development mode and provide mock data
       if (process.env.NODE_ENV === 'development') {
         // Fallback to mock QR code for testing
@@ -219,7 +201,6 @@ export const deviceService = {
    */
   getAllDevices: async (): Promise<Device[]> => {
     try {
-      deviceLogger.info('Fetching all devices');
       const response = await api.get('/client');
       // Check for the "Client not found" response
       if (
@@ -229,11 +210,9 @@ export const deviceService = {
         response.data.data.status === 'DISCONNECTED' ||
         response.data.data.status === 'LOGOUT'
       ) {
-        deviceLogger.info('No devices connected - client not found');
         return []; // Return empty array when no clients are connected
       }
 
-      deviceLogger.debug('Devices retrieved successfully');
       // Transform API data to match the Device interface
       // Check if we have data and convert to array if it's a single object
       if (response.data && response.data.data) {
@@ -257,8 +236,6 @@ export const deviceService = {
 
       return [];
     } catch (error) {
-      deviceLogger.error('Error fetching devices', error);
-
       // Fallback to mock data if the API call fails
       // await mockDelay();
       return [];
@@ -270,7 +247,6 @@ export const deviceService = {
    */
   getDeviceById: async (id: string): Promise<Device | null> => {
     try {
-      deviceLogger.info(`Fetching device with ID: ${id}`);
       const response = await api.get(`/client/${id}`);
 
       // Check for the "Client not found" response
@@ -279,11 +255,8 @@ export const deviceService = {
         (response.data.message === 'Client not found' ||
           response.data.code === 'NOT_FOUND')
       ) {
-        deviceLogger.info(`Device ${id} not found - client not found`);
         return null;
       }
-
-      deviceLogger.debug(`Device ${id} retrieved successfully`);
 
       if (response.data?.device) {
         // Convert API device to our Device type
@@ -302,8 +275,6 @@ export const deviceService = {
       }
       return null;
     } catch (error) {
-      deviceLogger.error(`Error fetching device ${id}`, error);
-
       // Fallback to mock behavior
       await mockDelay();
       const device = mockDevices.find((d) => d.id === id);
@@ -316,12 +287,7 @@ export const deviceService = {
    */
   createDevice: async (deviceData: Partial<Device> = {}): Promise<Device> => {
     try {
-      deviceLogger.info('Creating new device via API connection');
-
       const response = await api.post('/client/connect');
-      deviceLogger.info('Device created successfully', {
-        messageId: response.data?.messageId,
-      });
 
       // Convert the API response to a Device object
       return {
@@ -363,16 +329,7 @@ export const deviceService = {
     deviceData: Partial<Device>
   ): Promise<Device> => {
     try {
-      deviceLogger.info(`Updating device with ID: ${id}`, {
-        fields: Object.keys(deviceData),
-      });
-
       const response = await api.put(`/client/${id}`, deviceData);
-
-      deviceLogger.info('Device updated successfully', {
-        deviceId: id,
-        messageId: response.data?.messageId,
-      });
 
       // Return the updated device from the response
       return {
@@ -384,8 +341,6 @@ export const deviceService = {
           'disconnected',
       };
     } catch (error) {
-      deviceLogger.error(`Error updating device ${id}`, error);
-
       // Fallback to mock behavior
       await mockDelay();
       const deviceIndex = mockDevices.findIndex((d) => d.id === id);
@@ -404,20 +359,11 @@ export const deviceService = {
    */
   deleteDevice: async (id: string): Promise<boolean> => {
     try {
-      deviceLogger.info(`Deleting device with ID: ${id}`);
-
       // Using the /client/delete-device endpoint with POST and no payload
       const response = await api.post('/client/delete-device');
 
-      deviceLogger.info('Device deleted successfully', {
-        deviceId: id,
-        messageId: response.data?.messageId,
-      });
-
       return true;
     } catch (error) {
-      deviceLogger.error(`Error deleting device ${id}`, error);
-
       // Fallback to mock behavior
       await mockDelay();
       return true;
@@ -429,18 +375,10 @@ export const deviceService = {
    */
   disconnectDevice: async (deviceId: string): Promise<boolean> => {
     try {
-      deviceLogger.info(`Disconnecting device with ID: ${deviceId}`);
-
       const response = await api.post('/client/disconnect', { deviceId });
-
-      deviceLogger.info('Device disconnected successfully', {
-        messageId: response.data?.messageId,
-        deviceId,
-      });
 
       return true;
     } catch (error) {
-      deviceLogger.error('Error disconnecting device', { error, deviceId });
       // Fallback to mock success for testing
       await mockDelay();
       return true;
@@ -457,11 +395,7 @@ export const deviceService = {
     message?: string;
   }> => {
     try {
-      deviceLogger.info('Initiating device connection');
-
       const response = await api.post('/client/connect');
-
-      deviceLogger.info('Device connection initiated successfully');
 
       return {
         success: true,
@@ -469,8 +403,6 @@ export const deviceService = {
         message: response.data.message,
       };
     } catch (error) {
-      deviceLogger.error('Error connecting device', error);
-
       // Fallback to mock QR code for testing
       await mockDelay();
       return {

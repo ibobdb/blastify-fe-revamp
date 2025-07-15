@@ -2,7 +2,6 @@ import { LoginCredentials } from '@/types/auth';
 import api from './api';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-import logger from '@/utils/logger';
 
 // Backup mock user data for fallbacks
 const mockUser = {
@@ -24,7 +23,6 @@ const mockDelay = (ms: number = 500) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 // Create a dedicated logger for authentication services
-const authLogger = logger.child('AuthService');
 
 const authService = {
   /**
@@ -36,7 +34,7 @@ const authService = {
     credentials: LoginCredentials,
     rememberMe: boolean = false
   ) => {
-    authLogger.info('Login attempt', { email: credentials.email });
+    // Login attempt
     try {
       const response = await api.post('/auth/login', credentials);
       const { status, message, data } = response.data;
@@ -46,14 +44,11 @@ const authService = {
 
         // Validate that we received tokens
         if (!accessToken || !refreshToken) {
-          authLogger.error('Login response missing tokens', {
-            hasAccessToken: !!accessToken,
-            hasRefreshToken: !!refreshToken,
-          });
+          // Login response missing tokens
           throw new Error('Authentication failed - invalid server response');
         }
 
-        authLogger.debug('Login successful, setting tokens', { rememberMe });
+        // Login successful, setting tokens
 
         // Set token expiry times based on rememberMe preference
         const accessTokenExpiry = rememberMe ? 1 : 1 / 24; // 24 hours if remember me, 1 hour if not
@@ -75,7 +70,7 @@ const authService = {
 
         // Validate decoded token has required fields
         if (!decodedToken.id || !decodedToken.email || !decodedToken.name) {
-          authLogger.error('Invalid token structure', { decodedToken });
+          // Invalid token structure
           throw new Error('Authentication failed - invalid token structure');
         }
 
@@ -87,25 +82,20 @@ const authService = {
           avatar: decodedToken.avatar,
         };
 
-        authLogger.info('User authenticated successfully', {
-          userId: user.id,
-          role: user.role,
-        });
+        // User authenticated successfully
         return {
           success: true,
           user,
           message,
         };
       } else {
-        authLogger.warn('Authentication failed with status success=false', {
-          message,
-        });
+        // Authentication failed with status success=false
         throw new Error(message || 'Login failed');
       }
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message || error.message || 'Login failed';
-      authLogger.error('Authentication error', error);
+      // Authentication error
       throw new Error(errorMessage);
     }
   },
@@ -119,20 +109,17 @@ const authService = {
     password: string;
     phoneNumber: string;
   }) => {
-    authLogger.info('Registration attempt', {
-      email: userData.email,
-      name: userData.name,
-    });
+    // Registration attempt
     try {
       const response = await api.post('/auth/register', userData);
       const { status, message, data } = response.data;
 
       if (status) {
-        authLogger.info('Registration successful', { email: userData.email });
+        // Registration successful
 
         // If the API returns tokens on registration, store them
         if (data?.accessToken && data?.refreshToken) {
-          authLogger.debug('Setting authentication tokens after registration');
+          // Setting authentication tokens after registration
 
           // Store tokens in secure cookies
           Cookies.set('accessToken', data.accessToken, {
@@ -152,9 +139,7 @@ const authService = {
           user: data?.user || null,
         };
       } else {
-        authLogger.warn('Registration failed with status success=false', {
-          message,
-        });
+        // Registration failed with status success=false
         throw new Error(message || 'Registration failed');
       }
     } catch (error: any) {
@@ -162,7 +147,7 @@ const authService = {
         error.response?.data?.message ||
         error.message ||
         'Registration failed. Please try again.';
-      authLogger.error('Registration error', error);
+      // Registration error
       throw new Error(errorMessage);
     }
   },
@@ -170,13 +155,13 @@ const authService = {
    * Refresh the access token using the refresh token
    * @returns Promise with success status
    */ refreshToken: async () => {
-    authLogger.debug('Token refresh attempt');
+    // Token refresh attempt
     try {
       // Get the refresh token from cookies
       const refreshToken = Cookies.get('refreshToken');
 
       if (!refreshToken) {
-        authLogger.warn('Token refresh failed - no refresh token in cookies');
+        // Token refresh failed - no refresh token in cookies
         throw new Error('No refresh token available');
       }
 
@@ -185,7 +170,7 @@ const authService = {
 
       if (status) {
         const { accessToken } = data;
-        authLogger.debug('Access token refreshed successfully');
+        // Access token refreshed successfully
 
         // Update only the access token cookie
         Cookies.set('accessToken', accessToken, {
@@ -195,9 +180,7 @@ const authService = {
 
         return { success: true, message };
       } else {
-        authLogger.warn('Token refresh failed with status success=false', {
-          message,
-        });
+        // Token refresh failed with status success=false
         throw new Error(message || 'Token refresh failed');
       }
     } catch (error: any) {
@@ -205,7 +188,7 @@ const authService = {
         error.response?.data?.message ||
         error.message ||
         'Token refresh failed';
-      authLogger.error('Token refresh error', error);
+      // Token refresh error
       throw new Error(errorMessage);
     }
   },
@@ -214,9 +197,9 @@ const authService = {
    * @param email User email
    */
   requestEmailVerification: async (email: string) => {
-    authLogger.info('Email verification requested', { email });
+    // Email verification requested
     await mockDelay();
-    authLogger.debug('Email verification link sent (mock)');
+    // Email verification link sent (mock)
     return { success: true };
   },
   /**
@@ -224,7 +207,7 @@ const authService = {
    * @param email User email
    * @returns Promise with the result of the request
    */ requestPasswordReset: async (email: string) => {
-    authLogger.info('Password reset requested', { email });
+    // Password reset requested
     try {
       const response = await api.post('/auth/request-password-reset', {
         email,
@@ -232,16 +215,13 @@ const authService = {
       const { status, message } = response.data;
 
       if (status) {
-        authLogger.info('Password reset link sent successfully', { email });
+        // Password reset link sent successfully
         return {
           success: true,
           message: message || 'Password reset link sent to your email',
         };
       } else {
-        authLogger.warn(
-          'Password reset request failed with status success=false',
-          { message }
-        );
+        // Password reset request failed with status success=false
         throw new Error(message || 'Failed to request password reset');
       }
     } catch (error: any) {
@@ -249,7 +229,7 @@ const authService = {
         error.response?.data?.message ||
         error.message ||
         'Failed to request password reset';
-      authLogger.error('Password reset request error', { email, error });
+      // Password reset request error
       throw new Error(errorMessage);
     }
   },
@@ -259,7 +239,7 @@ const authService = {
    * @param data Reset password data containing token and new password
    * @returns Promise with the result of the password reset
    */ resetPassword: async (data: { token: string; newPassword: string }) => {
-    authLogger.info('Password reset attempt with token');
+    // Password reset attempt with token
     try {
       const { token, newPassword } = data;
       const response = await api.post(`/auth/reset-password?token=${token}`, {
@@ -269,15 +249,13 @@ const authService = {
       const { status, message } = response.data;
 
       if (status) {
-        authLogger.info('Password reset successful');
+        // Password reset successful
         return {
           success: true,
           message: message || 'Password reset successfully',
         };
       } else {
-        authLogger.warn('Password reset failed with status success=false', {
-          message,
-        });
+        // Password reset failed with status success=false
         throw new Error(message || 'Failed to reset password');
       }
     } catch (error: any) {
@@ -285,7 +263,7 @@ const authService = {
         error.response?.data?.message ||
         error.message ||
         'Failed to reset password';
-      authLogger.error('Password reset error', error);
+      // Password reset error
       throw new Error(errorMessage);
     }
   },
@@ -294,9 +272,9 @@ const authService = {
    * @param token Verification token
    */
   verifyEmail: async (token: string) => {
-    authLogger.info('Email verification attempt with token');
+    // Email verification attempt with token
     await mockDelay();
-    authLogger.debug('Email verified successfully (mock)');
+    // Email verified successfully (mock)
     return { success: true };
   },
 
@@ -328,7 +306,7 @@ const authService = {
    * @returns Promise with validation result
    */
   validatePassword: async (password: string) => {
-    authLogger.info('Password validation attempt');
+    // Password validation attempt
     try {
       const response = await api.post('/auth/validate-password', {
         password,
@@ -336,13 +314,13 @@ const authService = {
       const { status, message } = response.data;
 
       if (status) {
-        authLogger.info('Password validation successful');
+        // Password validation successful
         return {
           success: true,
           message: message || 'Password is valid',
         };
       } else {
-        authLogger.warn('Password validation failed', { message });
+        // Password validation failed
         throw new Error(message || 'Invalid password');
       }
     } catch (error: any) {
@@ -350,7 +328,7 @@ const authService = {
         error.response?.data?.message ||
         error.message ||
         'Failed to validate password';
-      authLogger.error('Password validation error', error);
+      // Password validation error
       throw new Error(errorMessage);
     }
   },
@@ -361,18 +339,16 @@ const authService = {
    *
    * @returns A promise that resolves to a success object
    */ logout: async () => {
-    authLogger.info('User logout initiated');
+    // User logout initiated
     try {
       // Just clear both tokens from cookies
       Cookies.remove('accessToken', { path: '/' });
       Cookies.remove('refreshToken', { path: '/' });
 
-      authLogger.info(
-        'User logged out successfully - tokens cleared from cookies'
-      );
+      // User logged out successfully - tokens cleared from cookies
       return { success: true };
     } catch (error) {
-      authLogger.error('Error clearing cookies during logout', error);
+      // Error clearing cookies during logout
       return { success: false };
     }
   },

@@ -402,33 +402,26 @@ export function HistoryTable() {
 
   return (
     <>
-      <div className="space-y-6">
-        {/* <StatusLegend /> */}
-        <div className="overflow-x-auto">
-          <DataTable
-            data={data}
-            columns={columns}
-            pagination={{
-              pagination,
-              onPageChange: (page: number) =>
-                setPagination((prev) => ({ ...prev, page: page + 1 })),
-              onPageSizeChange: (limit: number) =>
-                setPagination((prev) => ({ ...prev, limit, page: 1 })),
-            }}
-            loading={loading}
-            onSearch={(value: string) => {
-              handleFetchHistory(1, pagination.limit, value);
-            }}
-            onRefresh={() => handleFetchHistory()}
-            onRowClick={(row: DataMessage) => {
-              setSelectedMessage(row);
-              setIsDialogOpen(true);
-            }}
-            title="Messages Overview"
-            description="View the history of your sent blast messages. Track delivery status, recipients, and message details all in one place."
-          />
-        </div>
-      </div>
+      <DataTable
+        data={data}
+        columns={columns}
+        pagination={{
+          pagination,
+          onPageChange: (page: number) =>
+            setPagination((prev) => ({ ...prev, page: page + 1 })),
+          onPageSizeChange: (limit: number) =>
+            setPagination((prev) => ({ ...prev, limit, page: 1 })),
+        }}
+        loading={loading}
+        onSearch={(value: string) => {
+          handleFetchHistory(1, pagination.limit, value);
+        }}
+        onRefresh={() => handleFetchHistory()}
+        onRowClick={(row: DataMessage) => {
+          setSelectedMessage(row);
+          setIsDialogOpen(true);
+        }}
+      />
 
       <HistoryDetailDialog
         open={isDialogOpen}

@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { applySecurityHeaders } from '@/utils/security-headers';
 import { jwtDecode } from 'jwt-decode';
-import logger from '@/utils/logger';
-
-// Create middleware-specific logger
-const middlewareLogger = logger.child('Middleware');
 
 /**
  * Next.js Middleware - Authentication protection and security
@@ -51,28 +47,12 @@ export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get('accessToken')?.value;
   const refreshToken = request.cookies.get('refreshToken')?.value;
 
-  middlewareLogger.debug(`Access attempt: ${pathname}`, {
-    pathname,
-    isProtectedRoute,
-    hasAccessToken: !!accessToken,
-    hasRefreshToken: !!refreshToken,
-    method: request.method,
-    ip: request.headers.get('x-forwarded-for') || 'unknown',
-    userAgent: request.headers.get('user-agent') || 'unknown',
-  });
-
   // If accessing a protected route, check authentication
   if (isProtectedRoute) {
     // No access token - authentication required
     if (!accessToken) {
-      middlewareLogger.warn(`Unauthorized access attempt: ${pathname}`, {
-        pathname,
-        hasRefreshToken: !!refreshToken,
-      });
-
       // API routes should return 401 for client-side handling
       if (pathname.startsWith('/api')) {
-        middlewareLogger.debug(`Returning 401 for API route: ${pathname}`);
         return NextResponse.json(
           { success: false, message: 'Authentication required' },
           { status: 401 }
@@ -88,7 +68,6 @@ export function middleware(request: NextRequest) {
         url.searchParams.set('refresh', 'true');
       }
 
-      middlewareLogger.debug(`Redirecting to login: ${url.toString()}`);
       const response = NextResponse.redirect(url);
 
       // Add headers to help client understand what happened
@@ -105,23 +84,11 @@ export function middleware(request: NextRequest) {
 
       // Check if token has required fields
       if (!decodedToken.id || !decodedToken.email || !decodedToken.exp) {
-        middlewareLogger.warn(`Invalid token structure: ${pathname}`, {
-          hasId: !!decodedToken.id,
-          hasEmail: !!decodedToken.email,
-          hasExp: !!decodedToken.exp,
-        });
         throw new Error('Invalid token structure');
       }
 
       // Check token expiration
       if (!decodedToken.exp || decodedToken.exp <= currentTime) {
-        middlewareLogger.warn(`Expired token access attempt: ${pathname}`, {
-          userId: decodedToken.id || 'unknown',
-          expiry: decodedToken.exp,
-          currentTime,
-          tokenAge: currentTime - (decodedToken.iat || currentTime),
-        });
-
         // For API routes, return 401 for client-side handling
         if (pathname.startsWith('/api')) {
           return NextResponse.json(
@@ -134,24 +101,14 @@ export function middleware(request: NextRequest) {
         const url = new URL('/signin', request.url);
         url.searchParams.set('from', pathname);
         url.searchParams.set('expired', 'true');
-        middlewareLogger.debug(
-          `Redirecting to login due to expired token: ${url.toString()}`
-        );
         const response = NextResponse.redirect(url);
         response.headers.set('X-Middleware-Redirect', 'signin');
         response.headers.set('X-Redirect-Reason', 'expired-token');
         return response;
       }
 
-      // Valid token, log the access
-      middlewareLogger.info(`Authorized access: ${pathname}`, {
-        userId: decodedToken.id,
-        role: decodedToken.role || 'unknown',
-        method: request.method,
-      });
+      // Valid token, continue processing
     } catch (error) {
-      middlewareLogger.error(`Invalid token format: ${pathname}`, error);
-
       // Invalid token format
       if (pathname.startsWith('/api')) {
         return NextResponse.json(
@@ -164,9 +121,6 @@ export function middleware(request: NextRequest) {
       const url = new URL('/signin', request.url);
       url.searchParams.set('from', pathname);
       url.searchParams.set('invalid', 'true');
-      middlewareLogger.debug(
-        `Redirecting to login due to invalid token: ${url.toString()}`
-      );
       const response = NextResponse.redirect(url);
       response.headers.set('X-Middleware-Redirect', 'signin');
       response.headers.set('X-Redirect-Reason', 'invalid-token');
