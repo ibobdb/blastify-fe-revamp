@@ -37,7 +37,7 @@ import {
   WifiOff,
   Clock,
 } from 'lucide-react';
-
+import { MainPageLayout } from '@/components/dashboard/main-page-layout';
 // Dummy data for the dashboard
 const dashboardData = {
   totalDevices: 3,
@@ -124,194 +124,131 @@ export default function DashboardPage() {
     );
   };
   return (
-    <>
-      <div className="flex-1">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">
-              Welcome back, {user?.name || 'User'}
+    <MainPageLayout
+      title="Dashboard"
+      description={`Welcome back, ${
+        user?.name || 'User'
+      }! Here's your dashboard overview.`}
+    >
+      {/* Summary Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-base font-medium">
+              Total Devices
+            </CardTitle>
+            <Smartphone className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="py-2">
+            <div className="text-3xl font-bold">
+              {dashboardData.totalDevices}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Connected devices
             </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" className="font-medium">
-              View Reports
-            </Button>
-            <Button className="font-medium">New Broadcast</Button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Summary Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-base font-medium">
-                Total Devices
-              </CardTitle>
-              <Smartphone className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="py-2">
-              <div className="text-3xl font-bold">
-                {dashboardData.totalDevices}
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Connected devices
-              </p>
-            </CardContent>
-          </Card>
+        <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-base font-medium">
+              Broadcasts Sent
+            </CardTitle>
+            <Send className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="py-2">
+            <div className="text-3xl font-bold">
+              {dashboardData.broadcastsSent}
+            </div>
+            <p className="text-xs text-green-600 mt-2">+12 from last week</p>
+          </CardContent>
+        </Card>
 
-          <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-base font-medium">
-                Broadcasts Sent
-              </CardTitle>
-              <Send className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="py-2">
-              <div className="text-3xl font-bold">
-                {dashboardData.broadcastsSent}
-              </div>
-              <p className="text-xs text-green-600 mt-2">+12 from last week</p>
-            </CardContent>
-          </Card>
+        <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-base font-medium">
+              Active Schedules
+            </CardTitle>
+            <Calendar className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="py-2">
+            <div className="text-3xl font-bold">
+              {dashboardData.activeSchedules}
+            </div>
+            <p className="text-xs text-blue-600 mt-2">2 upcoming campaigns</p>
+          </CardContent>
+        </Card>
 
-          <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-base font-medium">
-                Active Schedules
-              </CardTitle>
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="py-2">
-              <div className="text-3xl font-bold">
-                {dashboardData.activeSchedules}
-              </div>
-              <p className="text-xs text-blue-600 mt-2">2 upcoming campaigns</p>
-            </CardContent>
-          </Card>
+        <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-base font-medium">
+              Broadcast Quota
+            </CardTitle>
+            <TrendingUp className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="py-2">
+            <div className="text-3xl font-bold">
+              {dashboardData.quota.total - dashboardData.quota.used}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              of {dashboardData.quota.total} remaining
+            </p>
+            <Progress
+              value={
+                (dashboardData.quota.used / dashboardData.quota.total) * 100
+              }
+              className="mt-3 h-2"
+            />
+          </CardContent>
+        </Card>
+      </div>
 
-          <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-base font-medium">
-                Broadcast Quota
-              </CardTitle>
-              <TrendingUp className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="py-2">
-              <div className="text-3xl font-bold">
-                {dashboardData.quota.total - dashboardData.quota.used}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                of {dashboardData.quota.total} remaining
-              </p>
-              <Progress
-                value={
-                  (dashboardData.quota.used / dashboardData.quota.total) * 100
-                }
-                className="mt-3 h-2"
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Chart and Recent Broadcasts */}
-        <div className="grid gap-6 lg:grid-cols-2 mb-8">
-          {/* Broadcasts Chart */}
-          <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
-            <CardHeader>
-              <CardTitle>Broadcasts Last 7 Days</CardTitle>
-              <CardDescription>
-                Daily broadcast activity overview
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="broadcasts" fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Recent Broadcasts Table */}
-          <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
-            <CardHeader>
-              <CardTitle>Recent Broadcasts</CardTitle>
-              <CardDescription>
-                Your 5 most recent broadcast campaigns
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentBroadcasts.map((broadcast) => (
-                    <TableRow key={broadcast.id}>
-                      <TableCell className="font-medium">
-                        {broadcast.name}
-                      </TableCell>
-                      <TableCell>{broadcast.date}</TableCell>
-                      <TableCell>{getStatusBadge(broadcast.status)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Device Status */}
+      {/* Chart and Recent Broadcasts */}
+      <div className="grid gap-6 lg:grid-cols-2 mb-8">
+        {/* Broadcasts Chart */}
         <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
           <CardHeader>
-            <CardTitle>Device Status</CardTitle>
+            <CardTitle>Broadcasts Last 7 Days</CardTitle>
+            <CardDescription>Daily broadcast activity overview</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="broadcasts" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Recent Broadcasts Table */}
+        <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
+          <CardHeader>
+            <CardTitle>Recent Broadcasts</CardTitle>
             <CardDescription>
-              Current status of your connected WhatsApp devices
+              Your 5 most recent broadcast campaigns
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Device Name</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Last Active
-                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {devices.map((device) => (
-                  <TableRow key={device.id}>
-                    <TableCell className="font-medium">{device.name}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getDeviceIcon(device.status)}
-                        <span
-                          className={
-                            device.status === 'online'
-                              ? 'text-green-600'
-                              : 'text-gray-500'
-                          }
-                        >
-                          {device.status.charAt(0).toUpperCase() +
-                            device.status.slice(1)}
-                        </span>
-                      </div>
+                {recentBroadcasts.map((broadcast) => (
+                  <TableRow key={broadcast.id}>
+                    <TableCell className="font-medium">
+                      {broadcast.name}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {device.lastActive}
-                    </TableCell>
+                    <TableCell>{broadcast.date}</TableCell>
+                    <TableCell>{getStatusBadge(broadcast.status)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -319,6 +256,55 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </>
+
+      {/* Device Status */}
+      <Card className="border border-gray-200 dark:border-gray-800 shadow-sm">
+        <CardHeader>
+          <CardTitle>Device Status</CardTitle>
+          <CardDescription>
+            Current status of your connected WhatsApp devices
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Device Name</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Last Active
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {devices.map((device) => (
+                <TableRow key={device.id}>
+                  <TableCell className="font-medium">{device.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {getDeviceIcon(device.status)}
+                      <span
+                        className={
+                          device.status === 'online'
+                            ? 'text-green-600'
+                            : 'text-gray-500'
+                        }
+                      >
+                        {device.status.charAt(0).toUpperCase() +
+                          device.status.slice(1)}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {device.lastActive}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </MainPageLayout>
   );
 }
