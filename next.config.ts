@@ -12,18 +12,6 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  // External packages for server components
-  serverExternalPackages: [],
-
-  // Experimental features to fix client reference manifest issues
-  experimental: {
-    // Ensure proper client component bundling
-    optimizePackageImports: [],
-  },
-
-  // Turbopack configuration (stable as of Next.js 15)
-  turbopack: {},
-
   // Setting this to false can help bypass TypeScript errors in development
   typescript: {
     // This ignores TypeScript errors during builds

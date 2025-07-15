@@ -11,7 +11,6 @@ import { LandingNavbar } from '@/components/landing/landing-navbar';
 export default function Home() {
   return (
     <>
-      <h1>BEJIR</h1>
       <LandingNavbar />
       <main>
         <HeroSection />
