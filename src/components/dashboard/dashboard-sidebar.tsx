@@ -186,12 +186,14 @@ export function DashboardSidebar({
             <MessageSquare className="w-5 h-5" />
           </div>
           {!isCollapsed && (
-            <div>
-              <div className="font-semibold text-lg">Blastify</div>
-              <div className="text-xs text-muted-foreground">
-                WhatsApp Management
+            <Link href="/dashboard" className="">
+              <div>
+                <div className="font-semibold text-lg">Blastify</div>
+                <div className="text-xs text-muted-foreground">
+                  WhatsApp Management
+                </div>
               </div>
-            </div>
+            </Link>
           )}
         </div>
       </div>
