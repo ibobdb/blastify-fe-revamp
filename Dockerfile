@@ -56,6 +56,13 @@ COPY . .
 # Build the application (includes our manifest fix script)
 RUN npm run build
 
+# Verify the build output and standalone directory
+RUN echo "Checking build output..." && \
+    ls -la .next/ && \
+    echo "Checking standalone directory..." && \
+    ls -la .next/standalone/ || echo "Standalone directory not found - checking next.config.ts" && \
+    cat next.config.ts | grep -A5 -B5 "output"
+
 # Verify the manifest files were created
 RUN ls -la .next/server/app/\(landing\)/ || echo "Listing landing directory"
 RUN ls -la .next/standalone/.next/server/app/\(landing\)/ || echo "Listing standalone landing directory"

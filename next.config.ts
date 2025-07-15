@@ -4,8 +4,8 @@ import { getSecurityHeaders } from './src/utils/security-headers';
 const nextConfig: NextConfig = {
   /* config options here */
 
-  // Temporarily disable standalone output to fix client reference manifest issues
-  // output: 'standalone',
+  // Enable standalone output for Docker builds
+  output: 'standalone',
 
   // Improve build performance
   compiler: {
