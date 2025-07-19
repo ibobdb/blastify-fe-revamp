@@ -84,12 +84,15 @@ function NavbarContent({
         className={`bg-transparent mx-auto h-14 w-full flex items-center px-4 sm:px-6 md:px-8 lg:px-10`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <Link
+          href="/"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        >
           <div className="flex items-center justify-center w-8 h-8 rounded-md bg-[#2979FF] text-white">
             <MessageSquare className="w-5 h-5" />
           </div>
           <span className="font-semibold text-lg text-[#222831]">Blastify</span>
-        </div>
+        </Link>
 
         {/* Desktop navigation */}
         <div className="hidden lg:flex justify-between flex-1 items-center ml-8">

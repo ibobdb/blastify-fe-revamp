@@ -20,6 +20,7 @@ import {
   Rocket,
   Building,
   Calculator,
+  Check,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +31,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { billingService } from '@/services/billing.service';
+
+interface PricingData {
+  quotaAmount: number;
+  pricePerQuota: number;
+  basePrice: number;
+  discountPercent: number;
+  discountAmount: number;
+  finalPrice: number;
+  currency: string;
+  formattedBasePrice: string;
+  formattedDiscountAmount: string;
+  formattedFinalPrice: string;
+}
 
 interface FeatureItem {
   name: string;
@@ -66,6 +81,7 @@ interface PricingCardProps {
   ctaAnimation?: CTAAnimation;
   checkColor?: string;
   onCustomPriceClick?: () => void;
+  redirectTo?: string;
 }
 
 export function PricingSection() {
@@ -78,19 +94,40 @@ export function PricingSection() {
   const [selectedQuantity, setSelectedQuantity] = useState(100);
   const [customQuantity, setCustomQuantity] = useState<number | ''>('');
   const [inputMethod, setInputMethod] = useState<'preset' | 'manual'>('preset');
+  const [pricing, setPricing] = useState<PricingData | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Pricing calculation constants - will be used in future discount calculations
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const yearlyDiscount = 0.8;
 
-  // Price calculation factors
-  const basePrice = 5000;
-  const pricePerMessage = 50;
-  const getTotalPrice = (quantity: number) => {
-    return basePrice + quantity * pricePerMessage;
-  };
-
   const presetOptions = [100, 250, 750, 1500, 2500, 5000];
+
+  // Calculate pricing when selected quantity changes
+  useEffect(() => {
+    const calculatePricing = async () => {
+      if (selectedQuantity > 0) {
+        setLoading(true);
+        try {
+          const response = await billingService.calculatePrice({
+            quotaAmount: selectedQuantity,
+          });
+          setPricing(response.data);
+        } catch (error) {
+          console.error('Error calculating pricing:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setPricing(null);
+      }
+    };
+
+    if (isCustomPricingOpen) {
+      const timeoutId = setTimeout(calculatePricing, 300); // Debounce
+      return () => clearTimeout(timeoutId);
+    }
+  }, [selectedQuantity, isCustomPricingOpen]);
 
   return (
     <section id="pricing" className="py-20 bg-white relative">
@@ -161,6 +198,7 @@ export function PricingSection() {
             }}
             ctaAnimation="slide-right"
             checkColor="#4CAF50"
+            redirectTo="/dashboard/billing"
           />
 
           <PricingCard
@@ -205,6 +243,7 @@ export function PricingSection() {
             }}
             ctaAnimation="zoom-in"
             checkColor="#2979FF"
+            redirectTo="/dashboard/billing"
           />
 
           <PricingCard
@@ -387,84 +426,114 @@ export function PricingSection() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="text-[#222831]/70">
-                                Messages
-                              </span>
-                              <motion.span
-                                key={selectedQuantity}
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="font-medium"
-                              >
-                                {selectedQuantity.toLocaleString()}
-                              </motion.span>
+                          {loading ? (
+                            <div className="flex items-center justify-center py-8">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2979FF]"></div>
                             </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-[#222831]/70">
-                                Base price
-                              </span>
-                              <span className="font-medium">
-                                Rp {basePrice.toLocaleString()}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-[#222831]/70">
-                                Price per message
-                              </span>
-                              <span className="font-medium">
-                                Rp {pricePerMessage}/message
-                              </span>
-                            </div>
-
-                            {selectedQuantity >= 1000 && (
-                              <div className="flex justify-between items-center text-green-500">
-                                <span>Volume discount</span>
-                                <span>
-                                  - Rp{' '}
-                                  {(selectedQuantity >= 5000 ? 10 : 5) *
-                                    selectedQuantity}
-                                </span>
-                              </div>
-                            )}
-
-                            <div className="pt-3 mt-3 border-t border-[#E5E7EB]">
+                          ) : pricing && selectedQuantity > 0 ? (
+                            <div className="space-y-3">
                               <div className="flex justify-between items-center">
-                                <span className="font-medium text-lg text-[#222831]">
-                                  Total Price
+                                <span className="text-[#222831]/70">
+                                  Messages
                                 </span>
-                                <motion.div
-                                  key={`total-${getTotalPrice(
-                                    selectedQuantity
-                                  )}`}
-                                  initial={{ scale: 0.9, color: '#2979FF' }}
-                                  animate={{ scale: 1, color: '#1565C0' }}
-                                  transition={{ duration: 0.5 }}
-                                  className="text-xl font-bold text-[#2979FF]"
+                                <motion.span
+                                  key={selectedQuantity}
+                                  initial={{ scale: 0.8, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  className="font-medium"
                                 >
-                                  <span className="text-lg">Rp </span>
-                                  {getTotalPrice(
-                                    selectedQuantity
-                                  ).toLocaleString()}
-                                </motion.div>
+                                  {selectedQuantity.toLocaleString()}
+                                </motion.span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-[#222831]/70">
+                                  Base price
+                                </span>
+                                <span className="font-medium">
+                                  {pricing.formattedBasePrice}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-[#222831]/70">
+                                  Price per message
+                                </span>
+                                <span className="font-medium">
+                                  Rp {pricing.pricePerQuota.toLocaleString()}
+                                  /message
+                                </span>
+                              </div>
+
+                              {pricing.discountPercent > 0 && (
+                                <div className="flex justify-between items-center text-green-500">
+                                  <span>
+                                    Volume discount ({pricing.discountPercent}%)
+                                  </span>
+                                  <span>
+                                    - {pricing.formattedDiscountAmount}
+                                  </span>
+                                </div>
+                              )}
+
+                              <div className="pt-3 mt-3 border-t border-[#E5E7EB]">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-medium text-lg text-[#222831]">
+                                    Total Price
+                                  </span>
+                                  <motion.div
+                                    key={`total-${pricing.finalPrice}`}
+                                    initial={{ scale: 0.9, color: '#2979FF' }}
+                                    animate={{ scale: 1, color: '#1565C0' }}
+                                    transition={{ duration: 0.5 }}
+                                    className="text-xl font-bold text-[#2979FF]"
+                                  >
+                                    {pricing.formattedFinalPrice}
+                                  </motion.div>
+                                </div>
+                              </div>
+
+                              {pricing.discountPercent > 0 && (
+                                <div className="mt-2 bg-[#FFF8E1] text-[#FF9800] text-xs font-medium px-2 py-1.5 rounded-md flex items-center gap-1">
+                                  <Medal className="h-3.5 w-3.5" />
+                                  Best value! Save more with higher volume
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-3 text-[#222831]/50">
+                              <div className="flex justify-between items-center">
+                                <span>Messages</span>
+                                <span>-</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span>Base price</span>
+                                <span>-</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span>Price per message</span>
+                                <span>-</span>
+                              </div>
+                              <div className="pt-3 mt-3 border-t border-[#E5E7EB]">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-medium text-lg">
+                                    Total Price
+                                  </span>
+                                  <span className="text-xl font-bold">
+                                    Select quantity
+                                  </span>
+                                </div>
                               </div>
                             </div>
-
-                            {selectedQuantity >= 1000 && (
-                              <div className="mt-2 bg-[#FFF8E1] text-[#FF9800] text-xs font-medium px-2 py-1.5 rounded-md flex items-center gap-1">
-                                <Medal className="h-3.5 w-3.5" />
-                                Best value! Save more with higher volume
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </CardContent>
                         <CardFooter className="flex-col gap-3">
                           <Button
                             className="w-full bg-[#2979FF] hover:bg-[#1565C0] text-white font-medium"
+                            disabled={!pricing || selectedQuantity <= 0}
                             asChild
                           >
-                            <Link href="/billing">Go to Billing Page</Link>
+                            <Link href="/dashboard/billing">
+                              Go to Billing Page
+                            </Link>
                           </Button>
 
                           <div className="text-xs text-center text-[#222831]/60">
@@ -534,6 +603,7 @@ function PricingCard({
   ctaAnimation = 'none',
   checkColor = '#4CAF50',
   onCustomPriceClick,
+  redirectTo,
 }: PricingCardProps) {
   const getFeatureName = (feature: Feature): string => {
     return typeof feature === 'string' ? feature : feature.name;
@@ -727,7 +797,10 @@ function PricingCard({
                 </div>
               ) : (
                 <Link
-                  href={buttonVariant === 'enterprise' ? '/contact' : '/signup'}
+                  href={
+                    redirectTo ||
+                    (buttonVariant === 'enterprise' ? '/contact' : '/signup')
+                  }
                 >
                   {buttonText}
                   <span

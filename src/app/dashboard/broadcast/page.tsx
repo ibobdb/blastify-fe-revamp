@@ -668,7 +668,7 @@ export default function BroadcastPage() {
               <Button
                 type="button"
                 className="rounded-l-sm rounded-r-none"
-                disabled={sendLoading}
+                disabled={sendLoading || !messageContent}
                 onClick={async () => {
                   setSendLoading(true);
                   await new Promise((resolve) => setTimeout(resolve, 700));
@@ -700,7 +700,7 @@ export default function BroadcastPage() {
               <Button
                 type="button"
                 className="rounded-l-none rounded-r-sm"
-                disabled={sendLoading}
+                disabled={sendLoading || !messageContent}
                 onClick={async () => {
                   setSendLoading(true);
                   await new Promise((resolve) => setTimeout(resolve, 700));

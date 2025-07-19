@@ -93,7 +93,7 @@ export function HowItWorksSection() {
             number={1}
             icon={<MessageSquare className="h-5 w-5" />}
             secondaryIcon={<FileSpreadsheet className="h-4 w-4" />}
-            title="Sign Up & Get Free Credits"
+            title="Sign Up & Free Credits"
             description="Create an account and instantly receive 100 free credits—no payment required"
             delay={0}
             color="#2979FF"

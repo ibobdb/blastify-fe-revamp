@@ -74,6 +74,25 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getAckStatusInfo = (status: string) => {
+  switch (status) {
+    case '-1':
+      return { variant: 'destructive' as const, label: 'Error' };
+    case '0':
+      return { variant: 'secondary' as const, label: 'Pending' };
+    case '1':
+      return { variant: 'default' as const, label: 'Server' };
+    case '2':
+      return { variant: 'outline' as const, label: 'Sent' };
+    case '3':
+      return { variant: 'default' as const, label: 'Read' };
+    case '4':
+      return { variant: 'secondary' as const, label: 'Played' };
+    default:
+      return { variant: 'outline' as const, label: status };
+  }
+};
+
 export function HistoryDetailDialog({
   open,
   onOpenChange,
@@ -101,7 +120,7 @@ export function HistoryDetailDialog({
               <div className="flex items-center gap-2">
                 {getStatusIcon(historyItem.status)}
                 <Badge className={getStatusColor(historyItem.status)}>
-                  {historyItem.status}
+                  {getAckStatusInfo(historyItem.status).label}
                 </Badge>
               </div>
             </div>
@@ -251,7 +270,7 @@ export function HistoryDetailDialog({
                 WhatsApp Details
               </h4>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                 {historyItem.whatsappMsgId && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">
@@ -262,18 +281,6 @@ export function HistoryDetailDialog({
                     </p>
                   </div>
                 )}
-
-                {historyItem.ackStatus && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Acknowledgment Status
-                    </label>
-                    <Badge variant="outline">{historyItem.ackStatus}</Badge>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {historyItem.deliveredAt && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">
@@ -281,28 +288,6 @@ export function HistoryDetailDialog({
                     </label>
                     <p className="text-xs font-mono bg-muted px-2 py-1 rounded">
                       {format(new Date(historyItem.deliveredAt), 'PP pp')}
-                    </p>
-                  </div>
-                )}
-
-                {historyItem.readAt && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Read
-                    </label>
-                    <p className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                      {format(new Date(historyItem.readAt), 'PP pp')}
-                    </p>
-                  </div>
-                )}
-
-                {historyItem.playedAt && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Played
-                    </label>
-                    <p className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                      {format(new Date(historyItem.playedAt), 'PP pp')}
                     </p>
                   </div>
                 )}

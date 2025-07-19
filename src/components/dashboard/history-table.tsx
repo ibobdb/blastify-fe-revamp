@@ -86,25 +86,6 @@ export function HistoryTable() {
       enableHiding: false,
     },
     {
-      accessorKey: 'id',
-      header: 'ID',
-      size: 100,
-      maxSize: 100,
-      cell: ({ row }) => {
-        const id = row.getValue('id') as string;
-        return (
-          <div className="w-20">
-            <span
-              className="font-mono text-muted-foreground text-xs truncate block"
-              title={id}
-            >
-              {id.slice(0, 8)}...
-            </span>
-          </div>
-        );
-      },
-    },
-    {
       accessorKey: 'number',
       header: 'Phone Number',
       size: 140,

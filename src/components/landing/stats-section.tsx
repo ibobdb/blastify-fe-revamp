@@ -196,10 +196,10 @@ export function StatsSection() {
                     </div>
                     <div>
                       <p className="font-medium text-card-foreground">
-                        John Doe
+                        Boby Nugraha
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Marketing Director, TechCorp
+                        IT Consultant, ByteWise Consulting
                       </p>
                     </div>
                   </div>
