@@ -401,7 +401,7 @@ export function HistoryTable() {
   };
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       <DataTable
         data={data}
         columns={columns}
@@ -428,6 +428,6 @@ export function HistoryTable() {
         onOpenChange={setIsDialogOpen}
         historyItem={selectedMessage}
       />
-    </>
+    </div>
   );
 }

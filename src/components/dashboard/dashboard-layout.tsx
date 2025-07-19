@@ -52,16 +52,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           isCollapsed={isSidebarCollapsed}
           onToggle={toggleSidebar}
         />
-        <div className="flex flex-col flex-grow w-full">
+        <div className="flex flex-col flex-grow w-full min-h-0">
           <DashboardNavbar onMenuClick={toggleSidebar} />
           <main
             className={cn(
-              'flex-grow overflow-auto transition-all duration-300 bg-gray-50 dark:bg-gray-900/20'
+              'flex-1 overflow-y-auto transition-all duration-300 bg-gray-50 dark:bg-gray-900/20'
             )}
           >
-            <div className="px-2 py-8 md:px-8 max-w-[1600px] mx-auto">
-              {children}
-            </div>
+            <div className="mx-auto min-h-full">{children}</div>
           </main>
         </div>
       </div>

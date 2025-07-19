@@ -114,8 +114,8 @@ export function DataTable<TData, TValue>({
     }
   };
   return (
-    <div className="w-full">
-      <div className="flex justify-between py-4 gap-2">
+    <div className="w-full h-full flex flex-col">
+      <div className="flex justify-between py-4 gap-2 flex-shrink-0">
         <form onSubmit={handleSearchSubmit} className="">
           <Input
             ref={inputRef}
@@ -141,16 +141,16 @@ export function DataTable<TData, TValue>({
         )}
       </div>
 
-      <div className="rounded-md border relative min-h-[200px] max-h-[600px] overflow-auto">
-        <div className="overflow-x-auto">
+      <div className="rounded-md border bg-background flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-auto">
           <Table className="min-w-full">
-            <TableHeader className="sticky top-0 bg-background z-1">
+            <TableHeader className="sticky top-0 bg-background border-b">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className="border-b bg-background h-8 px-2 py-1 text-xs font-medium whitespace-nowrap"
+                      className="h-8 px-2 py-1 text-xs font-medium whitespace-nowrap"
                     >
                       {header.isPlaceholder
                         ? null
@@ -178,7 +178,6 @@ export function DataTable<TData, TValue>({
                       onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''
                     }`}
                   >
-                    {' '}
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
@@ -206,7 +205,7 @@ export function DataTable<TData, TValue>({
           </Table>
         </div>
       </div>
-      <UiPagination className="mt-2">
+      <UiPagination className="mt-2 flex-shrink-0">
         <PaginationContent className="gap-1">
           <PaginationItem>
             <PaginationPrevious
