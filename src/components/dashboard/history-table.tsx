@@ -371,7 +371,7 @@ export function HistoryTable() {
       case '1':
         return 'Server';
       case '2':
-        return 'Device';
+        return 'Sent';
       case '3':
         return 'Read';
       case '4':
