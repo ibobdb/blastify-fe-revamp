@@ -1,12 +1,5 @@
 // Device service
-import {
-  Device,
-  ApiDevice,
-  ApiDeviceStatus,
-  DeviceStatus,
-  DeviceType,
-  mapApiStatusToUiStatus,
-} from '@/types/device';
+import { Device, ApiDevice, mapApiStatusToUiStatus } from '@/types/device';
 import api from '@/services/api';
 
 // Mock delay function to simulate API calls

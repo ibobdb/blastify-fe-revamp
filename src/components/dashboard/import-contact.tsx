@@ -11,10 +11,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { ImportIcon, Loader2Icon } from 'lucide-react';
 import { useState, useRef, useLayoutEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BroadcastService from '@/services/broadcast.service';
+import { deviceService } from '@/services/device.service';
+import { useConfirm } from '@/context/confirm.context';
 import { toast } from 'sonner';
 import { ImportContactResponse } from '@/services/broadcast.service';
 interface ImportContactDialogProps {
@@ -39,6 +42,12 @@ export function ImportContactDialog(props: ImportContactDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Router for navigation
+  const router = useRouter();
+
+  // Get confirmation dialog functionality
+  const { confirmDanger } = useConfirm();
   useLayoutEffect(() => {
     if (contentRef.current) {
       setContainerHeight(contentRef.current.offsetHeight);
@@ -47,8 +56,27 @@ export function ImportContactDialog(props: ImportContactDialogProps) {
 
   const onImportFromDeviceClick = async () => {
     setIsLoading(true);
-    console.log('Importing contacts from device...');
+
     try {
+      // Check client status before importing contacts
+      const clientStatus = await deviceService.getClientStatus();
+
+      // If client status is not "CONNECTED", show confirmation dialog before redirect
+      if (clientStatus.data.status !== 'CONNECTED') {
+        setIsLoading(false); // Stop loading before showing dialog
+
+        confirmDanger(
+          'Device Not Connected',
+          'Your WhatsApp device is not connected. You need to connect your device first before importing contacts. Would you like to go to the device page to connect?',
+          'Go to Device Page',
+          () => {
+            router.push('/dashboard/devices');
+          }
+        );
+        return;
+      }
+
+      // Continue with import process if connected
       const response = await BroadcastService.importContact();
       if (response.status) {
         setData(response.data.contacts || []);
@@ -58,6 +86,17 @@ export function ImportContactDialog(props: ImportContactDialogProps) {
       }
     } catch (error) {
       console.error('Error importing contacts:', error);
+      setIsLoading(false); // Stop loading before showing dialog
+
+      // On error, show confirmation dialog before redirect
+      confirmDanger(
+        'Connection Error',
+        'There was an error checking your device connection. Would you like to go to the device page to check your connection?',
+        'Go to Device Page',
+        () => {
+          router.push('/dashboard/device');
+        }
+      );
     } finally {
       setIsLoading(false);
     }

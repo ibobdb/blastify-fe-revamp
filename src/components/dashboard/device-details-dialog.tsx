@@ -46,7 +46,7 @@ export default function DeviceDetailsDialog({
             </div>
           </div>
           <div className="space-y-2">
-            <p className="text-sm flex justify-between">
+            <div className="text-sm flex justify-between">
               <span className="text-muted-foreground">Status:</span>
               <Badge
                 variant="outline"
@@ -57,15 +57,15 @@ export default function DeviceDetailsDialog({
               >
                 {device.status}
               </Badge>
-            </p>
-            <p className="text-sm flex justify-between">
+            </div>
+            <div className="text-sm flex justify-between">
               <span className="text-muted-foreground">Last active:</span>
               <span>{device.lastActive}</span>
-            </p>
-            <p className="text-sm flex justify-between">
+            </div>
+            <div className="text-sm flex justify-between">
               <span className="text-muted-foreground">Connected date:</span>
               <span>{new Date(device.connectedDate).toLocaleDateString()}</span>
-            </p>
+            </div>
           </div>
         </div>
       </DialogContent>

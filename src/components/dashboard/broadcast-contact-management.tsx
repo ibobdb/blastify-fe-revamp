@@ -173,7 +173,7 @@ export default function BroadcastContactManagement({
 
   return (
     <div
-      className="border rounded-md p-3 h-[305px] dark:bg-gray-700 flex flex-col overflow-hidden"
+      className="border rounded-md p-3 h-[305px] dark:bg-gray-700 flex flex-col overflow-scroll"
       style={{ display: 'flex', flexDirection: 'column' }}
     >
       {/* Add Contact Dialog */}
