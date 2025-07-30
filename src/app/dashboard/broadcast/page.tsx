@@ -1,14 +1,5 @@
 'use client';
-import {
-  ImportIcon,
-  TrashIcon,
-  TimerIcon,
-  Loader2Icon,
-  Globe2,
-  MenuIcon,
-  CogIcon,
-  ChevronDown,
-} from 'lucide-react';
+import { TimerIcon, Loader2Icon, CogIcon, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import ParaphraseList from '@/components/dashboard/paraphrase-list';
 import broadcastService from '@/services/broadcast.service';
@@ -24,20 +15,14 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PreviewMessage } from '@/components/dashboard/preview-message';
-import { SchedulerDialog } from '@/components/dashboard/scheduler-dialog';
+import { MainPageLayout } from '@/components/dashboard/main-page-layout';
 import { ScheduleResponse } from '@/components/dashboard/broadcast-send-confirm';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -175,8 +160,6 @@ export default function BroadcastPage() {
         : 'Broadcast sent successfully to all recipients!';
 
       toast.success(successMessage);
-      console.log('Broadcast data sent:', validationResult);
-
       return {
         success: true,
         message: successMessage,
@@ -315,16 +298,10 @@ export default function BroadcastPage() {
     }
   };
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Broadcast</h1>
-          <p className="text-muted-foreground mt-1">
-            Send messages to multiple contacts or groups at once. Use this
-            feature to reach a wider audience quickly.
-          </p>
-        </div>
-      </div>{' '}
+    <MainPageLayout
+      title="Broadcast"
+      description="Send messages to multiple contacts or groups at once. Use this feature to reach a wider audience quickly."
+    >
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex gap-4">
           <div className="w-8/12 lg:grid-cols-2 gap-6">
@@ -733,6 +710,6 @@ export default function BroadcastPage() {
         onConfirm={handleSendBroadcast}
         onReset={resetAllState}
       />
-    </div>
+    </MainPageLayout>
   );
 }

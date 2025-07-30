@@ -1,13 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { PlusCircle } from 'lucide-react';
 import { useState } from 'react';
 import DeviceList from '@/components/dashboard/device-list';
 import { Device } from '@/types/device';
@@ -15,6 +7,7 @@ import ClientDeviceDialogs from '@/components/dashboard/client-device-dialogs';
 import { deviceService } from '@/services/device.service';
 import { useConfirm } from '@/context';
 import { toast } from 'sonner';
+import { MainPageLayout } from '@/components/dashboard/main-page-layout';
 
 export default function DevicesPage() {
   const [addDeviceDialogOpen, setAddDeviceDialogOpen] = useState(false);
@@ -26,8 +19,6 @@ export default function DevicesPage() {
   const maxDevices = 1;
 
   const handleDeviceAction = async (action: string, deviceId: string) => {
-    console.log(`Action ${action} on device ${deviceId}`);
-
     // Function to refresh the device list
     const refreshDeviceList = () => {
       const deviceListComponent = document.querySelector(
@@ -106,7 +97,6 @@ export default function DevicesPage() {
         break;
 
       default:
-        console.log(`Action ${action} not implemented yet`);
         toast.info(`Action ${action} not implemented yet`);
     }
   };
@@ -138,41 +128,10 @@ export default function DevicesPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Your Devices</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your connected devices across all platforms
-          </p>
-        </div>
-
-        <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <p className="text-sm text-muted-foreground">
-            {connectedDevices} of {maxDevices} devices connected
-          </p>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="flex gap-2 items-center"
-                  onClick={handleAddDevice}
-                  disabled={connectedDevices >= maxDevices}
-                >
-                  <PlusCircle className="h-4 w-4" />
-                  <span>Add Device</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {connectedDevices >= maxDevices
-                  ? 'Maximum devices reached'
-                  : 'Connect a new device'}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
-
+    <MainPageLayout
+      title="Your Devices"
+      description="  Manage your connected devices across all platforms"
+    >
       <DeviceList
         onDeviceAction={handleDeviceAction}
         onAddDevice={handleAddDevice}
@@ -201,6 +160,6 @@ export default function DevicesPage() {
         deviceToReconnect={selectedDevice}
         onSuccessfulAction={handleSuccessfulReconnect}
       />
-    </div>
+    </MainPageLayout>
   );
 }
