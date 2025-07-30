@@ -71,16 +71,16 @@ export class MidtransService {
 
     const defaultOptions: SnapPayOptions = {
       onSuccess: (result) => {
-        console.log('Payment success:', result);
+        // Payment success
       },
       onPending: (result) => {
-        console.log('Payment pending:', result);
+        // Payment pending
       },
       onError: (result) => {
-        console.log('Payment error:', result);
+        // Payment error
       },
       onClose: () => {
-        console.log('Payment popup closed');
+        // Payment popup closed
       },
       ...options,
     };

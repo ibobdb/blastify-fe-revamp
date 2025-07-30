@@ -85,7 +85,6 @@ export function ImportContactDialog(props: ImportContactDialogProps) {
         );
       }
     } catch (error) {
-      console.error('Error importing contacts:', error);
       setIsLoading(false); // Stop loading before showing dialog
 
       // On error, show confirmation dialog before redirect

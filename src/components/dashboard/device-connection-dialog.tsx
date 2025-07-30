@@ -54,7 +54,6 @@ const processQRCodeData = (data: string): string => {
       }
     } catch (e) {
       // If decoding fails, use the original string
-      console.error('Failed to decode base64:', e);
     }
   }
 
@@ -135,19 +134,14 @@ export function DeviceConnectionDialog({
 
     try {
       let result: DeviceActionResult;
-      console.log(
-        `Initiating device ${isReconnect ? 'reconnection' : 'connection'}`
-      );
 
       // Call appropriate API based on whether this is a reconnect or new connection
       if (isReconnect && deviceToReconnect) {
         // For reconnection
         result = await deviceService.reconnectDevice(deviceToReconnect.id);
-        console.log('Reconnect API result:', result);
       } else {
         // For new device connection
         result = await deviceService.connectDevice();
-        console.log('Connect API result:', result);
       }
 
       if (result.success) {
@@ -155,7 +149,6 @@ export function DeviceConnectionDialog({
         const qrCodeValue = result.qrcode;
         if (qrCodeValue) {
           // Store the original QR code data
-          console.log('Setting QR code data from action result');
           setQrCodeData(qrCodeValue);
         }
 
@@ -173,7 +166,6 @@ export function DeviceConnectionDialog({
         // Start polling, with a small delay to ensure state is set properly
         setTimeout(() => {
           if (!isPolling) {
-            console.log('Starting polling after successful action');
             startPolling();
           }
         }, 100);
@@ -183,7 +175,6 @@ export function DeviceConnectionDialog({
         );
       }
     } catch (error) {
-      console.error('Error with device action:', error);
       toast.error(
         `Failed to ${
           isReconnect ? 'reconnect' : 'connect'
@@ -209,16 +200,13 @@ export function DeviceConnectionDialog({
     try {
       // Set loading state when starting a poll request
       setIsLoading(true);
-      console.log(`Polling QR code status... (isReconnect: ${isReconnect})`);
 
       // Call the API endpoint to get QR status with timeout
       let response;
       try {
         // Standard API call
         response = await deviceService.pollQrCode();
-        console.log('Polling QR code response:', response);
       } catch (apiError) {
-        console.error('API error during polling:', apiError);
         // If API call fails, we'll continue polling next time
         setIsLoading(false);
         return;
@@ -234,12 +222,10 @@ export function DeviceConnectionDialog({
       const qrCodeValue = responseWithPossibleQrcode.qrCode;
       if (qrCodeValue) {
         // Store the original QR code data
-        console.log('Setting new QR code data');
         setQrCodeData(qrCodeValue);
       }
 
       // Update the device status
-      console.log(`Device status update: ${response.status}`);
       setDeviceStatus(response.status);
 
       // If the device is connected, stop polling and close the dialog
@@ -289,7 +275,6 @@ export function DeviceConnectionDialog({
         return;
       } // If we've reached the maximum retries, generate a new QR code
       if (retryCount >= MAX_RETRIES - 1) {
-        console.log('Maximum retries reached, requesting new QR code');
         // Reset progress and retry count
         setProgress(0);
         setRetryCount(0);

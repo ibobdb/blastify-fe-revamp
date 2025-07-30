@@ -91,7 +91,6 @@ export function BillingSummary() {
         setError(response.message || 'Failed to fetch billing summary');
       }
     } catch (error) {
-      console.error('Error fetching billing summary:', error);
       setError('Error fetching billing summary');
     } finally {
       setLoading(false);

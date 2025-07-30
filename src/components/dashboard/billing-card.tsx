@@ -142,7 +142,7 @@ export function BillingCards({
         });
         setPlanPricings(pricingMap);
       } catch (error) {
-        console.error('Error loading plan pricings:', error);
+        // Error handled silently
       } finally {
         setLoading(false);
       }
@@ -179,7 +179,6 @@ export function BillingCards({
       setSelectedPlanPricing(null);
       setShowSimulateDialog(false);
     } catch (error) {
-      console.error('Error calculating custom plan pricing:', error);
       // Close dialog even if there's an error
       setShowSimulateDialog(false);
     } finally {

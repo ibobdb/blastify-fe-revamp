@@ -21,7 +21,6 @@ export const quotaService = {
 
       return response.data;
     } catch (error) {
-      console.error('Error fetching quota:', error);
       throw error;
     }
   },

@@ -54,7 +54,6 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Set a timeout to automatically hide loading
     const newTimeoutId = setTimeout(() => {
-      console.warn('Loading timeout reached - automatically hiding loading');
       hideLoading();
     }, timeout);
 

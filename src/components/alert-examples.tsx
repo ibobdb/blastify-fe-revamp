@@ -40,7 +40,7 @@ export function AlertExamples() {
           title="Success Alert"
           description="This is a success message. Everything went well!"
           dismissible
-          onDismiss={() => console.log('Success alert dismissed')}
+          onDismiss={() => {}}
         />
 
         <Alert
@@ -48,7 +48,7 @@ export function AlertExamples() {
           title="Error Alert"
           description="This is an error message. Something went wrong!"
           dismissible
-          onDismiss={() => console.log('Error alert dismissed')}
+          onDismiss={() => {}}
         />
 
         <Alert
@@ -56,7 +56,7 @@ export function AlertExamples() {
           title="Warning Alert"
           description="This is a warning message. Please be careful!"
           dismissible
-          onDismiss={() => console.log('Warning alert dismissed')}
+          onDismiss={() => {}}
         />
 
         <Alert
@@ -64,7 +64,7 @@ export function AlertExamples() {
           title="Info Alert"
           description="This is an info message. Here's some useful information!"
           dismissible
-          onDismiss={() => console.log('Info alert dismissed')}
+          onDismiss={() => {}}
         />
 
         <Alert
@@ -170,8 +170,8 @@ export function AlertExamples() {
           description={`This is a ${currentVariant} dialog with custom content.`}
           confirmText="Got it"
           showCancel={currentVariant === 'warning'}
-          onConfirm={() => console.log(`${currentVariant} confirmed`)}
-          onCancel={() => console.log(`${currentVariant} cancelled`)}
+          onConfirm={() => {}}
+          onCancel={() => {}}
         />
       </div>
 

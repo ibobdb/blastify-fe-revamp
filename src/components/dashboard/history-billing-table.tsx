@@ -417,13 +417,11 @@ export function HistoryBillingTable() {
           hasPreviousPage: pagination.page > 1,
         }));
       } else {
-        console.error('Failed to fetch transactions:', response.message);
         toast.error(response.message || 'Failed to fetch billing history');
         setData([]);
         setAllTransactions([]);
       }
     } catch (error) {
-      console.error('Error fetching transactions:', error);
       toast.error('Error fetching billing history');
       setData([]);
       setAllTransactions([]);

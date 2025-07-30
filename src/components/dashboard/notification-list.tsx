@@ -197,7 +197,6 @@ export function NotificationList() {
         setError(response.message || 'Failed to fetch notifications');
       }
     } catch (err) {
-      console.error('Error fetching notifications:', err);
       setError('Failed to fetch notifications');
     } finally {
       setLoading(false);
@@ -211,7 +210,7 @@ export function NotificationList() {
       // Refresh notifications after marking as read
       fetchNotifications();
     } catch (err) {
-      console.error('Error marking notifications as read:', err);
+      // Error handled silently
     }
   };
 
@@ -222,7 +221,7 @@ export function NotificationList() {
       // Refresh notifications after deletion
       fetchNotifications();
     } catch (err) {
-      console.error('Error deleting notifications:', err);
+      // Error handled silently
     }
   };
 
@@ -242,7 +241,7 @@ export function NotificationList() {
       // Refresh notifications after deletion
       fetchNotifications();
     } catch (err) {
-      console.error('Error clearing all notifications:', err);
+      // Error handled silently
     }
   };
 

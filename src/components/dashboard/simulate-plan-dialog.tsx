@@ -59,7 +59,7 @@ export function SimulatePlanDialog({
           });
           setPricing(response.data);
         } catch (error) {
-          console.error('Error calculating pricing:', error);
+          // Error handled by UI state
         } finally {
           setLoading(false);
         }

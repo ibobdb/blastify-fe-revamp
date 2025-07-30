@@ -196,11 +196,10 @@ export function ScheduleTable() {
           limit: response.data.pagination.limit,
         }));
       } else {
-        console.error('Failed to fetch schedules:', response.message);
+        // Error handled by UI state
       }
-      console.log('Fetched schedules:', response);
     } catch (error) {
-      console.error('Error fetching schedules:', error);
+      // Error handled by UI state
     } finally {
       setLoading(false);
     }
@@ -229,12 +228,10 @@ export function ScheduleTable() {
             // This function will be called with loading state managed by the dialog
             const response = await scheduleService.cancelSchedule(scheduleId);
             if (response.status) {
-              console.log('Schedule cancelled successfully:', response);
               toast.success('Schedule cancelled successfully');
               // Refresh the schedule list after cancellation
               handleFetchSchedules();
             } else {
-              console.error('Failed to cancel schedule:', response.message);
               toast.error(response.message || 'Failed to cancel schedule');
               throw new Error(response.message || 'Failed to cancel schedule');
             }
@@ -249,7 +246,6 @@ export function ScheduleTable() {
         }
       );
     } catch (error) {
-      console.error('Error cancelling schedule:', error);
       // Error handling is now done in the onConfirm callback
       // The toast.error for API failures is handled above
     }

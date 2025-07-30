@@ -126,7 +126,6 @@ export default function ImprovedAlertExamples() {
         onConfirm={async () => {
           // Simulate async operation
           await new Promise((resolve) => setTimeout(resolve, 1000));
-          console.log('Action confirmed!');
         }}
       />
     </div>

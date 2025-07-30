@@ -344,11 +344,9 @@ export function HistoryTable() {
           limit: response.data.pagination.limit,
         }));
       } else {
-        console.error('Failed to fetch history:', response.message);
         toast.error(response.message || 'Failed to fetch history');
       }
     } catch (error) {
-      console.error('Error fetching history:', error);
       toast.error('Error fetching message history');
     } finally {
       setLoading(false);

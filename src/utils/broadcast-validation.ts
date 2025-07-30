@@ -141,8 +141,6 @@ export const createBroadcastHandler = (
         message: successMessage,
       };
     } catch (error) {
-      console.error('Broadcast error:', error);
-
       // Handle different error types
       let errorMessage =
         'An unexpected error occurred while sending the broadcast.';

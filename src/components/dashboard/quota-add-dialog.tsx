@@ -85,9 +85,7 @@ export function QuotaAddDialog({ open, onOpenChange }: QuotaAddDialogProps) {
       } else {
         showError('Failed to load users', response.message);
       }
-      console.log('Fetched users:', response);
     } catch (error) {
-      console.error('Error fetching users:', error);
       showError('Error', 'Failed to load users. Please try again.');
     } finally {
       setLoadingUsers(false);
@@ -131,7 +129,6 @@ export function QuotaAddDialog({ open, onOpenChange }: QuotaAddDialogProps) {
         showError('Failed to Add Credits', response.message);
       }
     } catch (error) {
-      console.error('Error adding credits:', error);
       showError('Error', 'Failed to add credits. Please try again.');
     } finally {
       setLoading(false);

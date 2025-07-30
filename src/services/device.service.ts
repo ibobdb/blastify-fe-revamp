@@ -296,8 +296,6 @@ export const deviceService = {
         connectedDate: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Error creating device:', error);
-
       // Fallback to mock device if the API call fails
       await mockDelay();
 

@@ -85,7 +85,6 @@ export const Loading: React.FC<LoadingProps> = ({
 
       // Add timeout to automatically clear loading after 10 seconds to prevent infinite loading
       const timeoutId = setTimeout(() => {
-        console.warn('Loading timeout reached - clearing loading state');
         window.dispatchEvent(new CustomEvent('force-loading-cleanup'));
       }, 10000);
 

@@ -72,10 +72,7 @@ export default function ParaphraseList(props: ParaphraseProps) {
       }));
     }
 
-    console.log(
-      'Creating empty paraphrases array because variations is:',
-      Array.isArray(props.variations) ? 'empty array' : typeof props.variations
-    );
+    // Return empty array if no valid variations
     return [];
   });
   // Use useEffect to update paraphrases when props.variations changes

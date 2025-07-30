@@ -56,7 +56,6 @@ export default function DeviceList({
         }
       }
     } catch (err) {
-      console.error('Error fetching devices:', err);
       setError('Failed to load device data. Using fallback data instead.');
 
       // Get fallback data from the service (it already handles the fallback internally)

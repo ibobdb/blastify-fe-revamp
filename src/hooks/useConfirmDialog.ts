@@ -42,7 +42,7 @@ export function useConfirmDialog() {
             try {
               await options.onConfirm();
             } catch (error) {
-              console.error('Confirm action failed:', error);
+              // Error handled silently
             } finally {
               setIsLoading(false);
             }

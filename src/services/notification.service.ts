@@ -53,7 +53,6 @@ export const notificarionService = {
       const response = await api.get('/notification', { params });
       return response.data;
     } catch (error) {
-      console.error('Error fetching notifications:', error);
       throw error;
     }
   },
@@ -74,7 +73,6 @@ export const notificarionService = {
         message: response.data.message,
       };
     } catch (error) {
-      console.error('Error marking notification as read:', error);
       throw error;
     }
   },
@@ -95,7 +93,6 @@ export const notificarionService = {
         message: response.data.message,
       };
     } catch (error) {
-      console.error('Error deleting notifications:', error);
       throw error;
     }
   },

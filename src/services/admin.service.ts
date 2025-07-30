@@ -17,7 +17,6 @@ export const adminService = {
       };
       return userListResponse;
     } catch (error) {
-      console.error('Error fetching users:', error);
       throw error;
     }
   },
@@ -39,7 +38,6 @@ export const adminService = {
       };
       return addQuotaResponse;
     } catch (error) {
-      console.error('Error adding quota:', error);
       throw error;
     }
   },

@@ -55,7 +55,7 @@ export const ConfirmProvider: React.FC<{ children: React.ReactNode }> = ({
             try {
               await options.onConfirm();
             } catch (error) {
-              console.error('Confirm action failed:', error);
+              // Error handled silently
             } finally {
               setIsLoading(false);
             }

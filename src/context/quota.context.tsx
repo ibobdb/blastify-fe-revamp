@@ -49,7 +49,6 @@ export function QuotaProvider({ children }: QuotaProviderProps) {
       const response = await quotaService.getQuota();
       setQuotaData(response.data);
     } catch (err) {
-      console.error('Error fetching quota:', err);
       setError('Failed to load quota information');
     } finally {
       setLoading(false);

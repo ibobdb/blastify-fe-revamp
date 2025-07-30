@@ -227,7 +227,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             !decodedToken.name ||
             !decodedToken.exp
           ) {
-            console.warn('Invalid token structure, clearing authentication');
             Cookies.remove('accessToken', { path: '/' });
             Cookies.remove('refreshToken', { path: '/' });
             setLoading(false);
@@ -254,7 +253,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               // Recursively check auth again after refresh
               setTimeout(checkAuth, 100);
             } catch (refreshErr) {
-              console.warn('Token refresh failed, clearing authentication');
               // Clear cookies and auth state if refresh fails
               Cookies.remove('accessToken', { path: '/' });
               Cookies.remove('refreshToken', { path: '/' });
@@ -264,7 +262,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         } catch (err) {
-          console.warn('Token validation failed, clearing authentication');
           // Token is invalid, remove it
           Cookies.remove('accessToken', { path: '/' });
           Cookies.remove('refreshToken', { path: '/' });

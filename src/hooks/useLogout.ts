@@ -31,7 +31,6 @@ export function useLogout() {
         setTimeout(clearLoadingState, 100);
       }, 100);
     } catch (error) {
-      console.error('Logout error:', error);
       clearLoadingState();
     }
   }, [logout, router]);
