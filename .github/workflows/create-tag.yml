@@ -1,0 +1,192 @@
+name: Create Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_type:
+        description: 'Tag generation type'
+        required: true
+        type: choice
+        options:
+          - 'auto-version'
+          - 'auto-timestamp'
+          - 'manual'
+        default: 'auto-version'
+      tag_name:
+        description: 'Tag name (only for manual type, e.g., v1.0.0)'
+        required: false
+        type: string
+      tag_message:
+        description: 'Tag message/description'
+        required: false
+        type: string
+        default: 'Automated release tag'
+      create_release:
+        description: 'Create GitHub release'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version from package.json (auto-version)
+        if: github.event.inputs.tag_type == 'auto-version'
+        id: package-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "message=Auto-generated release v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate timestamp-based tag (auto-timestamp)
+        if: github.event.inputs.tag_type == 'auto-timestamp'
+        id: timestamp-tag
+        run: |
+          TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          TAG_NAME="v${TIMESTAMP}-${COMMIT_SHORT}"
+          echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "message=Auto-generated timestamp release $TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Set tag info (manual trigger)
+        if: github.event.inputs.tag_type == 'manual'
+        id: manual-tag
+        run: |
+          echo "version=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          echo "message=${{ github.event.inputs.tag_message }}" >> $GITHUB_OUTPUT
+
+      - name: Set final tag variables
+        id: tag-vars
+        run: |
+          if [ "${{ github.event.inputs.tag_type }}" == "auto-version" ]; then
+            echo "tag_name=${{ steps.package-version.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "tag_message=${{ steps.package-version.outputs.message }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.tag_type }}" == "auto-timestamp" ]; then
+            echo "tag_name=${{ steps.timestamp-tag.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "tag_message=${{ steps.timestamp-tag.outputs.message }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag_name=${{ steps.manual-tag.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "tag_message=${{ steps.manual-tag.outputs.message }}" >> $GITHUB_OUTPUT
+          fi
+          echo "create_release=${{ github.event.inputs.create_release }}" >> $GITHUB_OUTPUT
+
+      - name: Validate manual tag name
+        if: github.event.inputs.tag_type == 'manual' && github.event.inputs.tag_name == ''
+        run: |
+          echo "❌ Error: Tag name is required for manual tag type"
+          exit 1
+
+      - name: Show tag generation info
+        run: |
+          echo "🏷️ Tag Generation Information:"
+          echo "Tag Type: ${{ github.event.inputs.tag_type }}"
+          echo "Tag Name: ${{ steps.tag-vars.outputs.tag_name }}"
+          echo "Tag Message: ${{ steps.tag-vars.outputs.tag_message }}"
+          echo "Create Release: ${{ steps.tag-vars.outputs.create_release }}"
+          echo "Current Commit: $(git rev-parse HEAD)"
+          echo "Current Branch: $(git branch --show-current)"
+
+      - name: Check if tag exists
+        id: check-tag
+        run: |
+          if git rev-parse "${{ steps.tag-vars.outputs.tag_name }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag ${{ steps.tag-vars.outputs.tag_name }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag ${{ steps.tag-vars.outputs.tag_name }} does not exist"
+          fi
+
+      - name: Create and push tag
+        if: steps.check-tag.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "${{ steps.tag-vars.outputs.tag_name }}" -m "${{ steps.tag-vars.outputs.tag_message }}"
+          git push origin "${{ steps.tag-vars.outputs.tag_name }}"
+
+          echo "✅ Tag ${{ steps.tag-vars.outputs.tag_name }} created and pushed successfully"
+
+      - name: Generate changelog
+        if: steps.check-tag.outputs.exists == 'false' && steps.tag-vars.outputs.create_release == 'true'
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+
+          # Create changelog header
+          echo "## 🚀 What's Changed" > changelog.txt
+          echo "" >> changelog.txt
+
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "Generating changelog from $PREVIOUS_TAG to ${{ steps.tag-vars.outputs.tag_name }}"
+            
+            # Get commit count
+            COMMIT_COUNT=$(git rev-list --count $PREVIOUS_TAG..${{ steps.tag-vars.outputs.tag_name }})
+            echo "**$COMMIT_COUNT commits** since $PREVIOUS_TAG" >> changelog.txt
+            echo "" >> changelog.txt
+            
+            # Get commits with better formatting
+            git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..${{ steps.tag-vars.outputs.tag_name }} --no-merges >> changelog.txt
+          else
+            echo "No previous tag found, generating changelog from beginning"
+            
+            # Get total commit count
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            echo "**$COMMIT_COUNT total commits** in this release" >> changelog.txt
+            echo "" >> changelog.txt
+            
+            # Get recent commits (last 20 to avoid too long changelog)
+            git log --pretty=format:"- %s (%h)" --no-merges -20 >> changelog.txt
+          fi
+
+          # Add additional info
+          echo "" >> changelog.txt
+          echo "---" >> changelog.txt
+          echo "📅 **Release Date:** $(date '+%Y-%m-%d %H:%M:%S UTC')" >> changelog.txt
+          echo "🔗 **Commit:** $(git rev-parse HEAD)" >> changelog.txt
+
+          echo "changelog_file=changelog.txt" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.check-tag.outputs.exists == 'false' && steps.tag-vars.outputs.create_release == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag-vars.outputs.tag_name }}
+          name: ${{ steps.tag-vars.outputs.tag_name }}
+          body_path: changelog.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip tag creation (already exists)
+        if: steps.check-tag.outputs.exists == 'true'
+        run: |
+          echo "⚠️ Tag ${{ steps.tag-vars.outputs.tag_name }} already exists. Skipping tag creation."
+          exit 0
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: create-tag
+    if: always()
+    steps:
+      - name: Notify completion
+        run: |
+          if [ "${{ needs.create-tag.result }}" == "success" ]; then
+            echo "🎉 Tag creation workflow completed successfully!"
+          else
+            echo "❌ Tag creation workflow failed!"
+          fi
