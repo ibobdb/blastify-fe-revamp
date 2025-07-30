@@ -39,3 +39,8 @@ jobs:
             NEXT_PUBLIC_APP_NAME=${{ vars.NEXT_PUBLIC_APP_NAME }}
             NEXT_PUBLIC_API_KEY=${{ vars.NEXT_PUBLIC_API_KEY }}
             NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=${{ vars.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY }}
+      - name: Verify Environment Variables in Image
+        run: |
+          echo "Testing built image..."
+          docker run --rm ${{ secrets.DOCKER_USERNAME }}/blastify-fe-revamp:${{ env.LATEST_TAG }} env | grep NEXT_PUBLIC || echo "NEXT_PUBLIC vars not found"
+          docker run --rm ${{ secrets.DOCKER_USERNAME }}/blastify-fe-revamp:${{ env.LATEST_TAG }} cat /app/.env.local || echo ".env.local not found"
