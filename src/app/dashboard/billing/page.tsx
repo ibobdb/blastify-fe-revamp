@@ -6,7 +6,7 @@ import { midtransService } from '@/services/midtrans.service';
 import { useEffect, useState } from 'react';
 import { useGlobalAlert, useQuota } from '@/context';
 import { toast } from 'sonner';
-
+import { MainPageLayout } from '@/components/dashboard/main-page-layout';
 export default function BillingPage() {
   const [isPaymentReady, setIsPaymentReady] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
@@ -120,25 +120,15 @@ export default function BillingPage() {
   };
 
   return (
-    <div className="container mx-auto pt-8 px-4 md:px-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your billing information, view invoices, and update payment
-            methods. Ensure your account remains active and uninterrupted.
-          </p>
-        </div>
-      </div>
-
-      {/* Billing Pricing Section */}
-      <div className="">
-        <BillingCards
-          onCheckout={handleCheckout}
-          isCheckoutLoading={isCreatingTransaction}
-          isCheckoutDisabled={isSnapOpen}
-        />
-      </div>
-    </div>
+    <MainPageLayout
+      title="Billing History"
+      description="View your payment transactions and quota purchases. Track payment status and transaction details."
+    >
+      <BillingCards
+        onCheckout={handleCheckout}
+        isCheckoutLoading={isCreatingTransaction}
+        isCheckoutDisabled={isSnapOpen}
+      />
+    </MainPageLayout>
   );
 }

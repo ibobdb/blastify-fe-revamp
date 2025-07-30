@@ -6,7 +6,8 @@ import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { MessageSquare, ArrowLeft } from 'lucide-react';
 import { EmailVerificationRequestForm } from '@/components/auth/email-verification-request-form';
-import { LandingNavbar } from '@/components/landing/safe-landing-navbar';
+
+import { LandingNavbar } from '@/components/landing/landing-navbar';
 import { Footer } from '@/components/landing/footer';
 
 export default function VerifyEmailPage() {

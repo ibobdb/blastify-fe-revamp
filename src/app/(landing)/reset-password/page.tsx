@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { MessageSquare, Loader2 } from 'lucide-react';
 import { ResetPasswordForm } from '@/components/auth/reset-password-form';
-import { LandingNavbar } from '@/components/landing/safe-landing-navbar';
+import { LandingNavbar } from '@/components/landing/landing-navbar';
 import { Footer } from '@/components/landing/footer';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -14,7 +14,7 @@ import { Suspense } from 'react';
 // Component that safely uses useSearchParams within a Suspense boundary
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams ? searchParams.get('token') : null;
 
   return (
     <>

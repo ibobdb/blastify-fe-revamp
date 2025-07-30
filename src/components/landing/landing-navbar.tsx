@@ -156,7 +156,6 @@ export function LandingNavbar() {
         {/* Auth Buttons - aligned right with enhanced styling */}
         <div className="flex-1 flex items-center justify-end">
           <div className="hidden md:flex items-center gap-3">
-            <ThemeToggle />
             <Button
               variant="outline"
               size="sm"

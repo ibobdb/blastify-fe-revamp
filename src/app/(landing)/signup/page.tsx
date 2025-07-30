@@ -18,18 +18,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { LandingNavbar } from '@/components/landing/safe-landing-navbar';
+import { LandingNavbar } from '@/components/landing/landing-navbar';
 import { toast } from 'sonner';
 import { Footer } from '@/components/landing/footer';
-import { Separator } from '@/components/ui/separator';
+
 import { motion } from 'framer-motion';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+
 import authService from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import {

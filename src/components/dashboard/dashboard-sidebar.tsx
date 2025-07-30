@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -11,30 +10,15 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAuth } from '@/context';
 import {
-  ChevronLeft,
-  ChevronRight,
   Home,
-  BarChart3,
-  Package,
-  ListFilter,
-  Tag,
-  Box,
-  Warehouse,
-  Truck,
-  Store,
-  LineChart,
-  Users,
-  Settings,
+  Key,
   Smartphone,
   Cast,
   History,
   WalletCards,
   CalendarCheck,
   MessageSquare,
-  PhoneCall,
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -117,7 +101,6 @@ export function DashboardSidebar({
   onToggle,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const { user } = useAuth();
 
   const navigation = [
     {
@@ -164,7 +147,7 @@ export function DashboardSidebar({
           href: '/dashboard/billing-history',
         },
         {
-          icon: <Home size={20} />,
+          icon: <Key size={20} />,
           label: 'API Access',
           href: '/dashboard/api-management',
         },
@@ -178,7 +161,6 @@ export function DashboardSidebar({
         isCollapsed ? 'w-20' : 'w-64'
       )}
     >
-      {' '}
       {/* Logo and Toggle Button */}
       <div className="h-16 border-b border-border flex items-center justify-between px-4">
         <div className="flex items-center gap-3 overflow-hidden">
@@ -186,7 +168,7 @@ export function DashboardSidebar({
             <MessageSquare className="w-5 h-5" />
           </div>
           {!isCollapsed && (
-            <Link href="/dashboard" className="">
+            <Link href="/dashboard">
               <div>
                 <div className="font-semibold text-lg">Blastify</div>
                 <div className="text-xs text-muted-foreground">
@@ -219,7 +201,7 @@ export function DashboardSidebar({
             </SidebarGroup>
           ))}
         </div>
-      </div>{' '}
+      </div>
       {/* Sidebar Footer */}
       <div
         className={cn(
