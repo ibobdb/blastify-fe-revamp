@@ -35,8 +35,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/blastify-fe-revamp:${{ env.LATEST_TAG }}
           build-args: |
             GIT_TAG=${{ env.LATEST_TAG }}
-            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
-            NEXT_PUBLIC_APP_NAME=${{ secrets.NEXT_PUBLIC_APP_NAME }}
-            NEXT_PUBLIC_API_KEY=${{ secrets.NEXT_PUBLIC_API_KEY }}
-            NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=${{ secrets.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY }}
-            NEXT_PUBLIC_IS_PRODUCTION=${{ secrets.NEXT_PUBLIC_IS_PRODUCTION }}
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_APP_NAME=${{ vars.NEXT_PUBLIC_APP_NAME }}
+            NEXT_PUBLIC_API_KEY=${{ vars.NEXT_PUBLIC_API_KEY }}
+            NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=${{ vars.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY }}
