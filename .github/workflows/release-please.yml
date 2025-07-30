@@ -1,9 +1,6 @@
 name: release-please
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
 
 permissions:
@@ -13,11 +10,19 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: google-github-actions/release-please-action@v4
-        id: release
+      - uses: google-github-actions/release-please-action@v3
         with:
           release-type: node
+          package-name: blastify-fe-revamp
+          changelog-types: |
+            [
+              {"type":"feat","section":"Features"},
+              {"type":"fix","section":"Bug Fixes"},
+              {"type":"chore","section":"Chores"},
+              {"type":"docs","section":"Documentation"},
+              {"type":"style","section":"Styles"},
+              {"type":"refactor","section":"Code Refactoring"},
+              {"type":"perf","section":"Performance Improvements"},
+              {"type":"test","section":"Tests"}
+            ]
