@@ -6,15 +6,7 @@ import { DataTable } from '@/components/dashboard/datatable';
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  MoreHorizontal,
-  Copy,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  KeyIcon,
-} from 'lucide-react';
+import { MoreHorizontal, Copy, Edit, Trash2, KeyIcon } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +26,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { PasswordValidationDialog } from '@/components/dashboard/password-validation-dialog';
 
 interface ApiKey {
   id: string;
@@ -74,77 +65,14 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
   const [loading, setLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingApiKey, setDeletingApiKey] = useState<ApiKey | null>(null);
-  const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
 
-  // Password validation states
-  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<{
-    type: 'view' | 'copy-key' | 'copy-id';
-    data: { keyId: string; key?: string; label?: string };
-  } | null>(null);
-
-  const toggleKeyVisibility = (keyId: string) => {
-    setPendingAction({
-      type: 'view',
-      data: { keyId },
-    });
-    setPasswordDialogOpen(true);
-  };
-
-  const handlePasswordValidated = () => {
-    if (!pendingAction) return;
-
-    switch (pendingAction.type) {
-      case 'view':
-        setVisibleKeys((prev) => {
-          const newSet = new Set(prev);
-          if (newSet.has(pendingAction.data.keyId)) {
-            newSet.delete(pendingAction.data.keyId);
-          } else {
-            newSet.add(pendingAction.data.keyId);
-          }
-          return newSet;
-        });
-        break;
-      case 'copy-key':
-      case 'copy-id':
-        if (pendingAction.data.key && pendingAction.data.label) {
-          executeClipboardCopy(
-            pendingAction.data.key,
-            pendingAction.data.label
-          );
-        }
-        break;
-    }
-
-    setPendingAction(null);
-  };
-
-  const executeClipboardCopy = async (text: string, label: string) => {
+  const copyToClipboard = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
       toast.success(`${label} copied to clipboard`);
     } catch (error) {
       toast.error(`Failed to copy ${label.toLowerCase()}`);
     }
-  };
-
-  const requestPasswordForCopy = (text: string, label: string) => {
-    setPendingAction({
-      type: label === 'API key' ? 'copy-key' : 'copy-id',
-      data: { keyId: '', key: text, label },
-    });
-    setPasswordDialogOpen(true);
-  };
-
-  const maskApiKey = (key: string) => {
-    if (key.length <= 8) return key;
-    return `${key.slice(0, 4)}${'*'.repeat(key.length - 8)}${key.slice(-4)}`;
-  };
-
-  const copyToClipboard = async (text: string, label: string) => {
-    // This function is kept for backward compatibility but now redirects to password validation
-    requestPasswordForCopy(text, label);
   };
 
   const handleDeleteApiKey = async (apiKey: ApiKey) => {
@@ -189,44 +117,6 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
       cell: ({ row }) => (
         <div className="font-medium">{row.getValue('name')}</div>
       ),
-    },
-    {
-      accessorKey: 'key',
-      header: 'API Key',
-      size: 300,
-      cell: ({ row }) => {
-        const apiKey = row.original;
-        const isVisible = visibleKeys.has(apiKey.id);
-        const displayKey = isVisible ? apiKey.key : maskApiKey(apiKey.key);
-
-        return (
-          <div className="flex items-center gap-2">
-            <code className="text-xs bg-muted px-2 py-1 rounded font-mono max-w-[200px] truncate">
-              {displayKey}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => toggleKeyVisibility(apiKey.id)}
-            >
-              {isVisible ? (
-                <EyeOff className="h-3 w-3" />
-              ) : (
-                <Eye className="h-3 w-3" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => copyToClipboard(apiKey.key, 'API key')}
-            >
-              <Copy className="h-3 w-3" />
-            </Button>
-          </div>
-        );
-      },
     },
     {
       accessorKey: 'isActive',
@@ -329,12 +219,6 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
                 <Copy className="mr-2 h-4 w-4" />
                 Copy ID
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => copyToClipboard(apiKey.key, 'API key')}
-              >
-                <Copy className="mr-2 h-4 w-4" />
-                Copy Key
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleToggleStatus(apiKey)}>
                 <Edit className="mr-2 h-4 w-4" />
@@ -426,15 +310,6 @@ export function ApiKeyTable({ onCreateNew, refreshTrigger }: ApiKeyTableProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <PasswordValidationDialog
-        open={passwordDialogOpen}
-        onOpenChange={setPasswordDialogOpen}
-        onValidated={handlePasswordValidated}
-        title="Confirm Password"
-        description="Please enter your password to perform this sensitive action."
-        actionLabel="Confirm"
-      />
     </>
   );
 }

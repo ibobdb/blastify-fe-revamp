@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PlusIcon, X, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
