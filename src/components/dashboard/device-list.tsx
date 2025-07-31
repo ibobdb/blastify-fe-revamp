@@ -37,10 +37,9 @@ export default function DeviceList({
 
     try {
       const fetchedDevices = await deviceService.getAllDevices();
-
+      console.log('Fetched devices:', fetchedDevices);
       if (fetchedDevices && fetchedDevices.length > 0) {
         setDevices(fetchedDevices);
-        setUsingMockData(false);
 
         // Notify parent component about updated devices
         if (onDevicesUpdate) {
@@ -83,19 +82,10 @@ export default function DeviceList({
   };
   return (
     <div>
-      {' '}
       <div
         className="flex justify-between items-center mb-6"
         data-refresh-trigger
       >
-        <div>
-          {usingMockData && (
-            <div className="flex items-center text-amber-600 text-sm">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              Using mock data. Click refresh to try again.
-            </div>
-          )}
-        </div>
         <Button
           variant="outline"
           size="sm"

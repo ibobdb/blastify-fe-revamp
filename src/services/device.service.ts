@@ -197,11 +197,9 @@ export const deviceService = {
       const response = await api.get('/client');
       // Check for the "Client not found" response
       if (
-        (response.data.data.status === false &&
-          (response.data.data.message === 'Client not found' ||
-            response.data.data.code === 'NOT_FOUND')) ||
-        response.data.data.status === 'DISCONNECTED' ||
-        response.data.data.status === 'LOGOUT'
+        response.data.data.status === false &&
+        (response.data.data.message === 'Client not found' ||
+          response.data.data.code === 'NOT_FOUND')
       ) {
         return []; // Return empty array when no clients are connected
       }

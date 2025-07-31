@@ -111,20 +111,13 @@ function SignInForm() {
         localStorage.removeItem('rememberedEmail');
         localStorage.removeItem('rememberMe');
       }
-
-      console.log('Remember Me:', values.rememberMe);
-
       await login(values.email, values.password, values.rememberMe);
-
       // Only redirect and show success if login was successful
       // The login function will throw an error if login fails
       toast.success('Login successful');
       router.push(decodeURI(callbackUrl));
     } catch (error) {
       console.error('Login error:', error);
-      // Error is already handled by the auth context and displayed in the form
-      // The user will stay on the signin page to see the error message
-      // Do not redirect on error - just stay on the page and show the error
     } finally {
       setIsLoading(false);
     }
