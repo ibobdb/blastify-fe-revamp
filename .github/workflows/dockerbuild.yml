@@ -60,10 +60,28 @@ jobs:
         run: |
           CURRENT_TIME=$(date '+%Y-%m-%d %H:%M:%S UTC')
 
-          curl --location 'https://api.blastify.tech/api-keys/send-messages' \
+          echo "Sending notification to Blastify API..."
+
+          RESPONSE=$(curl --location 'https://api.blastify.tech/api-keys/send-messages' \
           --header "x-api-key: ${BLASTIFY_API_KEY}" \
           --header 'Content-Type: application/json' \
           --data "{
             \"numbers\": [\"082169072681\"],
             \"content\": \"✅ Docker build berhasil!\\n\\n🏷️ Tag: ${{ needs.docker.outputs.tag }}\\n🚀 Repository: ${{ github.repository }}\\n📅 Waktu: ${CURRENT_TIME}\\n🔗 Commit: ${{ github.sha }}\"
-          }"
+          }" \
+          --write-out "HTTPSTATUS:%{http_code}" \
+          --silent \
+          --output /tmp/response.json)
+
+          HTTP_STATUS=$(echo $RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          RESPONSE_BODY=$(cat /tmp/response.json)
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response Body: $RESPONSE_BODY"
+
+          if [ $HTTP_STATUS -eq 200 ] || [ $HTTP_STATUS -eq 201 ]; then
+            echo "✅ Notification sent successfully!"
+          else
+            echo "❌ Failed to send notification. HTTP Status: $HTTP_STATUS"
+            exit 1
+          fi
