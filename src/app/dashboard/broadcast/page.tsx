@@ -74,6 +74,10 @@ export default function BroadcastPage() {
     setParaphraseList([]);
     setFinalParaphrase([]);
     setVariationType('random');
+    // Reset scheduler states
+    setIsConfirmOpen(false);
+    setConfirmWithScheduler(false);
+    setSelectedSchedule(null);
     reset();
     toast.success('Form reset successfully');
   };
@@ -167,6 +171,12 @@ export default function BroadcastPage() {
         : 'Broadcast sent successfully to all recipients!';
 
       toast.success(successMessage);
+
+      // Reset scheduler states on successful send/schedule
+      setIsConfirmOpen(false);
+      setConfirmWithScheduler(false);
+      setSelectedSchedule(null);
+
       return {
         success: true,
         message: successMessage,
@@ -655,7 +665,11 @@ export default function BroadcastPage() {
       <BroadcastSendConfirm
         isOpen={isConfirmOpen}
         isScheduled={confirmWithScheduler}
-        onClose={() => setIsConfirmOpen(false)}
+        onClose={() => {
+          setIsConfirmOpen(false);
+          setConfirmWithScheduler(false);
+          setSelectedSchedule(null);
+        }}
         onConfirm={handleSendBroadcast}
         onReset={resetAllState}
       />
