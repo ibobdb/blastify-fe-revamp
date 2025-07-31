@@ -20,6 +20,7 @@ import {
   CalendarCheck,
   MessageSquare,
 } from 'lucide-react';
+import packageJson from '../../../package.json';
 
 interface DashboardSidebarProps {
   isCollapsed: boolean;
@@ -50,7 +51,7 @@ const SidebarItem = ({
               variant="ghost"
               size="sm"
               className={cn(
-                'w-full justify-start h-auto py-2.5 px-3 my-1 rounded-lg',
+                'w-full justify-start h-auto py-2.5 px-3 my-1 rounded-lg cursor-pointer',
                 isActive
                   ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30'
                   : 'hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -172,7 +173,7 @@ export function DashboardSidebar({
               <div>
                 <div className="font-semibold text-lg">Blastify</div>
                 <div className="text-xs text-muted-foreground">
-                  WhatsApp Management
+                  WhatsApp Automation
                 </div>
               </div>
             </Link>
@@ -205,17 +206,17 @@ export function DashboardSidebar({
       {/* Sidebar Footer */}
       <div
         className={cn(
-          'border-t border-gray-100 dark:border-gray-800 p-4 text-xs text-gray-500 dark:text-gray-400',
+          'border-t border-gray-100 dark:border-gray-800 p-4 text-xs text-gray-700 dark:text-gray-400 text-center',
           isCollapsed && 'hidden sm:block text-center'
         )}
       >
         {!isCollapsed ? (
           <div>
             <div className="font-medium mb-1">Blastify © 2025</div>
-            <div>Version 1.0.0</div>
+            <div>Version {packageJson.version}</div>
           </div>
         ) : (
-          <div className="py-2 text-xs">v1.0.0</div>
+          <div className="py-2 text-xs">v{packageJson.version}</div>
         )}
       </div>
     </div>
