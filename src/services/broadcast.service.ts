@@ -5,7 +5,7 @@ export interface BroadcastMessage {
   numbers: string[];
   media?: File | string | null; // File or URL of the media to send
   variations?: string[];
-  scheduleTime?: string;
+  scheduleDate?: string;
 }
 
 export interface BroadcastSendResponse {
@@ -64,7 +64,7 @@ const broadcastService = {
         numbers: broadcastData.numbers,
         media: broadcastData.media || null,
         variations: broadcastData.variations || [],
-        scheduleTime: broadcastData.scheduleTime || '',
+        scheduleDate: broadcastData.scheduleDate || '',
       };
 
       // Send the request to the API
