@@ -182,23 +182,3 @@ jobs:
       tag_name: ${{ steps.tag-vars.outputs.tag_name }}
       tag_created: ${{ steps.check-tag.outputs.exists == 'false' }}
       tag_message: ${{ steps.tag-vars.outputs.tag_message }}
-  blastify-notification:
-    runs-on: ubuntu-latest
-    needs: create-tag
-    if: needs.create-tag.result == 'success' && needs.create-tag.outputs.tag_created == 'true'
-    steps:
-      - name: Kirim notifikasi untuk tag yang berhasil dibuat
-        env:
-          BLASTIFY_API_KEY: ${{ secrets.BLASTIFY_API_KEY }}
-        run: |
-          TAG_NAME="${{ needs.create-tag.outputs.tag_name }}"
-          TAG_MESSAGE="${{ needs.create-tag.outputs.tag_message }}"
-          CURRENT_TIME=$(date '+%Y-%m-%d %H:%M:%S UTC')
-
-          curl --location 'https://api.blastify.tech/api-keys/send-messages' \
-          --header "x-api-key: ${BLASTIFY_API_KEY}" \
-          --header 'Content-Type: application/json' \
-          --data "{
-            \"numbers\": [\"082169072681\"],
-            \"content\": \"✅ Tag baru berhasil dibuat!\\n\\n🏷️ Tag: ${TAG_NAME}\\n📝 Message: ${TAG_MESSAGE}\\n🚀 Repository: ${{ github.repository }}\\n📅 Waktu: ${CURRENT_TIME}\\n🔗 Commit: ${{ github.sha }}\"
-          }"
