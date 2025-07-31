@@ -1,6 +1,7 @@
 'use client';
 import { TimerIcon, Loader2Icon, CogIcon, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import React from 'react';
 import ParaphraseList from '@/components/dashboard/paraphrase-list';
 import broadcastService from '@/services/broadcast.service';
 import z from 'zod';
@@ -37,7 +38,8 @@ const messageSchema = z.object({
   number: z.string(),
   variations: z.array(z.string()).optional(),
 });
-
+import { TextAreaAdvance } from '@/components/text-area-advance';
+import { Checkbox } from '@/components/ui/checkbox';
 // Form type inferred from the schema
 type MessageFormValues = z.infer<typeof messageSchema>;
 
@@ -77,7 +79,7 @@ export default function BroadcastPage() {
   };
 
   // Form setup with React Hook Form
-  const { register, reset } = useForm<MessageFormValues>({
+  const { register, reset, setValue } = useForm<MessageFormValues>({
     // resolver: zodResolver(messageSchema),
     defaultValues: {
       content: '',
@@ -86,6 +88,11 @@ export default function BroadcastPage() {
       variations: [],
     },
   });
+
+  // Sync messageContent with form value
+  React.useEffect(() => {
+    setValue('content', messageContent);
+  }, [messageContent, setValue]);
 
   // Handle image selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -304,100 +311,33 @@ export default function BroadcastPage() {
     >
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex gap-4">
-          <div className="w-8/12 lg:grid-cols-2 gap-6">
+          <div className="w-full lg:grid-cols-2 gap-6">
             <div className="flex justify-between">
               <h3 className="text-lg font-semibold mb-2">Message Contacts</h3>
             </div>
             {/* Message Content Section */}
             <div className="space-y-4">
               <div>
-                <textarea
-                  {...register('content')}
-                  className="w-full min-h-[200px] p-3 border rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900"
+                <TextAreaAdvance
+                  value={messageContent}
+                  onChange={(value) => setMessageContent(value)}
                   placeholder="Enter your message content here..."
-                  onChange={(e) => setMessageContent(e.target.value)}
-                />{' '}
-                <div className="text-xs text-gray-500 mt-1 space-y-1">
-                  <p>WhatsApp message formatting:</p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1 border rounded-md p-2 bg-gray-50 dark:bg-gray-900">
-                    <div className="flex items-center gap-2">
-                      <code className="bg-gray-200 dark:bg-gray-800 px-1 rounded">
-                        *text*
-                      </code>
-                      <span>
-                        for <strong>bold</strong> text
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-gray-200 dark:bg-gray-800 px-1 rounded">
-                        _text_
-                      </code>
-                      <span>
-                        for <em>italic</em> text
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-gray-200 dark:bg-gray-800 px-1 rounded">
-                        ~text~
-                      </code>
-                      <span>
-                        for <span className="line-through">strikethrough</span>{' '}
-                        text
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-gray-200 dark:bg-gray-800 px-1 rounded">
-                        ```text```
-                      </code>
-                      <span>
-                        for{' '}
-                        <code className="bg-gray-200 dark:bg-gray-800 px-1 rounded">
-                          monospace
-                        </code>{' '}
-                        text
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-gray-200 dark:bg-gray-800 px-1 rounded">
-                        \n
-                      </code>
-                      <span>for line break</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Recipients Section - Empty for now but keeping the layout structure */}
-            <div>{/* Content for the right column can be added later */}</div>
-          </div>
-          <div className="w-4/12 lg:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between">
-                  <h3 className="text-lg font-semibold mb-2">
-                    Message Contacts
-                  </h3>
-                </div>
-
-                <BroadcastContactManagement
-                  onContactsChange={(c) => handleContacts(c)}
+                  className="w-full min-h-[200px]"
                 />
               </div>
             </div>
           </div>
         </div>
-        <div className="flex">
-          <div className="space-y-4 mt-6">
-            <h3 className="text-lg font-semibold mb-2">Message Options</h3>
 
-            <div className="flex items-start space-x-2">
-              <input
-                type="checkbox"
+        <div className="flex gap-2 mt-4">
+          <div className="w-1/2">
+            <h3 className="text-lg font-semibold mb-2">Message Options</h3>
+            <div className="flex items-start space-x-3">
+              <Checkbox
                 id="includeImage"
-                className="mt-1 h-4 w-4"
                 checked={includeImage}
-                onChange={() => {
-                  setIncludeImage(!includeImage);
+                onCheckedChange={(checked) => {
+                  setIncludeImage(!!checked);
                   if (includeImage) {
                     // If unchecking, remove the selected image as well
                     setSelectedImage(null);
@@ -514,13 +454,11 @@ export default function BroadcastPage() {
               </div>
             </div>
             {/* Enable Paraphrase Option */}
-            <div className="flex items-start space-x-2">
-              <input
-                type="checkbox"
+            <div className="flex items-start space-x-3">
+              <Checkbox
                 id="enableParaphrase"
-                className="mt-1 h-4 w-4"
                 checked={enableParaphrase}
-                onChange={() => setEnableParaphrase(!enableParaphrase)}
+                onCheckedChange={(checked) => setEnableParaphrase(!!checked)}
               />
               <div>
                 <label
@@ -609,7 +547,18 @@ export default function BroadcastPage() {
               </div>
             </div>
           </div>
+          <div className="w-1/2">
+            <div>
+              <div className="flex justify-between">
+                <h3 className="text-lg font-semibold mb-2">Message Contacts</h3>
+              </div>
+              <BroadcastContactManagement
+                onContactsChange={(c) => handleContacts(c)}
+              />
+            </div>
+          </div>
         </div>
+
         <div className="flex justify-end w-full mt-6">
           <div className="flex gap-3">
             <DropdownMenu>

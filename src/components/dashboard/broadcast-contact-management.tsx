@@ -173,7 +173,7 @@ export default function BroadcastContactManagement({
 
   return (
     <div
-      className="border rounded-md p-3 h-[305px] dark:bg-gray-700 flex flex-col overflow-scroll"
+      className="border rounded-md p-3 h-[305px] dark:bg-gray-700 flex flex-col "
       style={{ display: 'flex', flexDirection: 'column' }}
     >
       {/* Add Contact Dialog */}
@@ -185,7 +185,7 @@ export default function BroadcastContactManagement({
       {/* Search and actions - fixed at the top */}
       <div className="flex justify-between items-center mb-2 flex-none">
         <div className="flex gap-2 items-center">
-          <div className="w-[200px]">
+          <div className="">
             <input
               type="search"
               placeholder="Search contacts..."
@@ -193,7 +193,7 @@ export default function BroadcastContactManagement({
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
-          </div>{' '}
+          </div>
           <button
             className="p-1.5 rounded-md border hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-blue-600"
             onClick={() => setIsAddDialogOpen(true)}
