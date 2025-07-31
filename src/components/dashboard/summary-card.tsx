@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Smartphone, Send, Calendar, TrendingUp } from 'lucide-react';
+import { Smartphone, Send, Calendar, TrendingUp, Loader2 } from 'lucide-react';
 import { dashboardService } from '@/services/dashboard.service';
 import React from 'react';
 interface SummaryCardProps {
@@ -41,7 +41,11 @@ export function SummaryCard({ date }: SummaryCardProps) {
         </CardHeader>
         <CardContent className="py-2">
           <div className="text-3xl font-semibold">
-            {summaryData ? summaryData.totalDevices : 'Loading...'}
+            {summaryData ? (
+              summaryData.totalDevices
+            ) : (
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            )}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
             Connected devices
@@ -58,7 +62,11 @@ export function SummaryCard({ date }: SummaryCardProps) {
         </CardHeader>
         <CardContent className="py-2">
           <div className="text-3xl font-semibold">
-            {summaryData ? summaryData.broadcastSent : 'Loading...'}
+            {summaryData ? (
+              summaryData.broadcastSent
+            ) : (
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            )}
           </div>
           <p className="text-xs text-green-600 mt-2">
             Broadcasts sent this week
@@ -75,7 +83,11 @@ export function SummaryCard({ date }: SummaryCardProps) {
         </CardHeader>
         <CardContent className="py-2">
           <div className="text-3xl font-semibold">
-            {summaryData ? summaryData.activeSchedules : 'Loading...'}
+            {summaryData ? (
+              summaryData.activeSchedules
+            ) : (
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            )}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
             Scheduled broadcasts
@@ -92,7 +104,11 @@ export function SummaryCard({ date }: SummaryCardProps) {
         </CardHeader>
         <CardContent className="py-2">
           <div className="text-3xl font-semibold">
-            {summaryData ? summaryData.currentQuota : 'Loading...'}
+            {summaryData ? (
+              summaryData.currentQuota
+            ) : (
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            )}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
             Current broadcast quota

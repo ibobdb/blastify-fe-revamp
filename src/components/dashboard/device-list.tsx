@@ -86,7 +86,7 @@ export default function DeviceList({
         className="flex justify-between items-center mb-6"
         data-refresh-trigger
       >
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           onClick={handleRefresh}
@@ -95,7 +95,7 @@ export default function DeviceList({
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh
-        </Button>
+        </Button> */}
       </div>
       <DataLoadingWrapper
         isLoading={loading}
