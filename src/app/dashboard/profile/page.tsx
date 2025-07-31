@@ -100,32 +100,32 @@ export default function ProfilePage() {
     <MainPageLayout
       title="Profile Settings"
       description="Manage your account settings and preferences"
-      actionButtons={
-        !isEditing ? (
-          <Button onClick={() => setIsEditing(true)} className="gap-2">
-            <Edit className="h-4 w-4" />
-            Edit Profile
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleCancel} className="gap-2">
-              <X className="h-4 w-4" />
-              Cancel
-            </Button>
-            <Button onClick={form.handleSubmit(onSubmit)} className="gap-2">
-              <Save className="h-4 w-4" />
-              Save Changes
-            </Button>
-          </div>
-        )
-      }
+      // actionButtons={
+      //   !isEditing ? (
+      //     <Button onClick={() => setIsEditing(true)} className="gap-2">
+      //       <Edit className="h-4 w-4" />
+      //       Edit Profile
+      //     </Button>
+      //   ) : (
+      //     <div className="flex gap-2">
+      //       <Button variant="outline" onClick={handleCancel} className="gap-2">
+      //         <X className="h-4 w-4" />
+      //         Cancel
+      //       </Button>
+      //       <Button onClick={form.handleSubmit(onSubmit)} className="gap-2">
+      //         <Save className="h-4 w-4" />
+      //         Save Changes
+      //       </Button>
+      //     </div>
+      //   )
+      // }
     >
       <div className="space-y-6">
         <Tabs defaultValue="general" className="space-y-4">
           <TabsList>
             <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
+            {/* <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
