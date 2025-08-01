@@ -27,15 +27,11 @@ export default function BillingPage() {
   const handleCheckout = async (quota: number) => {
     try {
       setIsCreatingTransaction(true);
-      console.log('Proceeding to checkout with quota:', quota);
-
       // Create transaction using billing service
       const transactionResponse = await billingService.createTransaction({
         quotaAmount: quota,
       });
-
       setIsCreatingTransaction(false);
-
       if (
         transactionResponse.status &&
         transactionResponse.data?.transaction.snapToken
@@ -61,6 +57,7 @@ export default function BillingPage() {
           {
             onSuccess: async (result: any) => {
               setIsSnapOpen(false);
+              setIsCreatingTransaction(false); // Reset checkout state
               showSuccess('Payment Successful');
 
               // Refresh quota after successful payment
@@ -69,14 +66,12 @@ export default function BillingPage() {
             },
             onPending: (result: any) => {
               setIsSnapOpen(false);
-              console.log('Payment pending:', result);
               showWarning(
                 'Payment is being processed. Please complete your payment.'
               );
             },
             onError: (result: any) => {
               setIsSnapOpen(false);
-              console.log('Payment error:', result);
               showError('Payment failed. Please try again or contact support.');
             },
             onClose: () => {

@@ -8,7 +8,7 @@ export default function BillingHistoryPage() {
       title="Billing History"
       description="View your payment transactions and quota purchases. Track payment status and transaction details."
     >
-      <BillingSummary />
+      {/* <BillingSummary /> */}
       <HistoryBillingTable />
     </MainPageLayout>
   );
