@@ -230,11 +230,6 @@ export function HistoryBillingTable() {
                   >
                     {formatPaymentType(paymentType)}
                   </Badge>
-                  {paymentDetails?.bank && (
-                    <div className="text-xs text-muted-foreground font-medium">
-                      {paymentDetails.bank.toUpperCase()}
-                    </div>
-                  )}
                 </div>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs">
