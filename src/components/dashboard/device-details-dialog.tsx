@@ -27,24 +27,12 @@ export default function DeviceDetailsDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {device.type === 'mobile' ? (
-              <Smartphone className="h-5 w-5" />
-            ) : (
-              <Monitor className="h-5 w-5" />
-            )}
-            <span>{device.name}</span>
-          </DialogTitle>
+          <DialogTitle>Detail Device</DialogTitle>
           <DialogDescription>
             View detailed information and connection status
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="flex justify-center p-4">
-            <div className="border border-muted p-4 rounded-md">
-              <QrCode className="h-32 w-32 text-primary" />
-            </div>
-          </div>
           <div className="space-y-2">
             <div className="text-sm flex justify-between">
               <span className="text-muted-foreground">Status:</span>
@@ -60,7 +48,7 @@ export default function DeviceDetailsDialog({
             </div>
             <div className="text-sm flex justify-between">
               <span className="text-muted-foreground">Last active:</span>
-              <span>{device.lastActive}</span>
+              <span>{new Date(device.connectedDate).toLocaleDateString()}</span>
             </div>
             <div className="text-sm flex justify-between">
               <span className="text-muted-foreground">Connected date:</span>

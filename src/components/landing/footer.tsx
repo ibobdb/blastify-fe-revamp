@@ -95,7 +95,7 @@ export function Footer() {
               <ul className="mt-4 space-y-3">
                 <li>
                   <Link
-                    href="/features"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Features
@@ -103,7 +103,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/pricing"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Pricing
@@ -111,7 +111,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/integrations"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Integrations
@@ -119,7 +119,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/changelog"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Changelog
@@ -135,7 +135,7 @@ export function Footer() {
               <ul className="mt-4 space-y-3">
                 <li>
                   <Link
-                    href="/documentation"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Documentation
@@ -143,7 +143,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/tutorials"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Tutorials
@@ -151,7 +151,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/blog"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Blog
@@ -159,7 +159,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/support"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Support Center
@@ -175,7 +175,7 @@ export function Footer() {
               <ul className="mt-4 space-y-3">
                 <li>
                   <Link
-                    href="/about"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     About Us
@@ -183,7 +183,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/contact"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Contact
@@ -191,7 +191,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/careers"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Careers
@@ -199,7 +199,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/legal"
+                    href="/"
                     className="text-sm text-muted-foreground hover:text-primary"
                   >
                     Privacy & Terms

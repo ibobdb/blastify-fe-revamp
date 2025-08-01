@@ -118,7 +118,7 @@ export function LandingNavbar() {
             ))}
 
             {/* Resources dropdown for future expansion */}
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -149,7 +149,7 @@ export function LandingNavbar() {
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
         </nav>
 

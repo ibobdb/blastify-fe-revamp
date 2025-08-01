@@ -35,14 +35,6 @@ export default function DeviceCard({
     >
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {device.type === 'mobile' ? (
-              <Smartphone className="h-6 w-6 text-muted-foreground" />
-            ) : (
-              <Monitor className="h-6 w-6 text-muted-foreground" />
-            )}
-            <CardTitle>{device.name}</CardTitle>
-          </div>
           <Badge
             variant="outline"
             className={cn(
@@ -57,7 +49,9 @@ export default function DeviceCard({
           <div className="flex flex-col space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span>Last active: {device.lastActive}</span>
+              <span>
+                Last active: {new Date(device.lastActive).toLocaleDateString()}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-muted-foreground" />

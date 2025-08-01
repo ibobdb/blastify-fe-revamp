@@ -41,7 +41,6 @@ export default function DevicesPage() {
           setIsReconnecting(true);
           setAddDeviceDialogOpen(true);
         } catch (error) {
-          console.error('Failed to initiate device reconnection:', error);
           toast.error('Failed to initiate device reconnection');
         }
         break;
@@ -62,7 +61,6 @@ export default function DevicesPage() {
               refreshDeviceList();
             }
           } catch (error) {
-            console.error('Failed to disconnect device:', error);
             toast.error('Failed to disconnect device');
           }
         }
@@ -84,7 +82,6 @@ export default function DevicesPage() {
               refreshDeviceList();
             }
           } catch (error) {
-            console.error('Failed to delete device:', error);
             toast.error('Failed to delete device');
           }
         }

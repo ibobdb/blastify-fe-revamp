@@ -37,7 +37,7 @@ export default function DeviceList({
 
     try {
       const fetchedDevices = await deviceService.getAllDevices();
-      console.log('Fetched devices:', fetchedDevices);
+
       if (fetchedDevices && fetchedDevices.length > 0) {
         setDevices(fetchedDevices);
 
