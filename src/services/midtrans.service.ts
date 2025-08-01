@@ -44,7 +44,7 @@ export class MidtransService {
       }
 
       const script = document.createElement('script');
-      script.src = 'https://app.sandbox.midtrans.com/snap/snap.js'; // Use production URL for live
+      script.src = 'https://app.midtrans.com/snap/snap.js'; // Use production URL for live
       script.setAttribute('data-client-key', this.clientKey);
 
       script.onload = () => {
