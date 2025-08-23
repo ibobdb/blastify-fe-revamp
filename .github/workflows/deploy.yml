@@ -23,3 +23,5 @@ jobs:
               {"type":"perf","section":"Performance Improvements"},
               {"type":"test","section":"Tests"}
             ]
+          release-pr: false
+          publish: true
