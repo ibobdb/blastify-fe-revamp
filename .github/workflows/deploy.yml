@@ -5,50 +5,21 @@ permissions:
   contents: write
   pull-requests: read
 jobs:
-  release:
+  release-please:
     runs-on: ubuntu-latest
-    outputs:
-      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Release Please
-        id: release
-        uses: google-github-actions/release-please-action@v4
+      - uses: google-github-actions/release-please-action@v3
         with:
           release-type: node
           package-name: blastify-fe-revamp
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  docker:
-    runs-on: ubuntu-latest
-    needs: release
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Build and Push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/blastify-fe-revamp:${{ needs.release.outputs.tag_name }}
-          build-args: |
-            GIT_TAG=${{ needs.release.outputs.tag_name }}
-            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
-            NEXT_PUBLIC_APP_NAME=${{ secrets.NEXT_PUBLIC_APP_NAME }}
-            NEXT_PUBLIC_API_KEY=${{ secrets.NEXT_PUBLIC_API_KEY }}
-            NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=${{ secrets.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY }}
-
-      - name: Verify Environment Variables in Image
-        run: |
-          echo "Testing built image..."
-          docker run --rm ${{ secrets.DOCKER_USERNAME }}/blastify-fe-revamp:${{ needs.release.outputs.tag_name }} env | grep NEXT_PUBLIC || echo "NEXT_PUBLIC secrets not found"
+          changelog-types: |
+            [
+              {"type":"feat","section":"Features"},
+              {"type":"fix","section":"Bug Fixes"},
+              {"type":"chore","section":"Chores"},
+              {"type":"docs","section":"Documentation"},
+              {"type":"style","section":"Styles"},
+              {"type":"refactor","section":"Code Refactoring"},
+              {"type":"perf","section":"Performance Improvements"},
+              {"type":"test","section":"Tests"}
+            ]
